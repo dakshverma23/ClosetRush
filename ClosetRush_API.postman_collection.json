@@ -1,0 +1,307 @@
+{
+  "info": {
+    "name": "ClosetRush API",
+    "description": "Complete API collection for ClosetRush subscription platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@test.com\",\n  \"mobile\": \"9876543210\",\n  \"password\": \"password123\",\n  \"address\": \"123 Test Street\",\n  \"userType\": \"individual\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"]}
+          }
+        },
+        {
+          "name": "Login Admin",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@closetrush.com\",\n  \"password\": \"Admin@123\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"]}
+          }
+        },
+        {
+          "name": "Login with Mobile",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"9876543210\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/auth/login/mobile", "host": ["{{baseUrl}}"], "path": ["auth", "login", "mobile"]}
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+            ],
+            "url": {"raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{adminToken}}"}],
+            "url": {"raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"]}
+          }
+        },
+        {
+          "name": "Get User Stats",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{adminToken}}"}],
+            "url": {"raw": "{{baseUrl}}/users/stats/summary", "host": ["{{baseUrl}}"], "path": ["users", "stats", "summary"]}
+          }
+        },
+        {
+          "name": "Get Single User",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{adminToken}}"}],
+            "url": {"raw": "{{baseUrl}}/users/:id", "host": ["{{baseUrl}}"], "path": ["users", ":id"], "variable": [{"key": "id", "value": "USER_ID"}]}
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"email\": \"updated@test.com\",\n  \"mobile\": \"9999999999\",\n  \"address\": \"Updated Address\",\n  \"userType\": \"individual\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/users/:id", "host": ["{{baseUrl}}"], "path": ["users", ":id"], "variable": [{"key": "id", "value": "USER_ID"}]}
+          }
+        },
+        {
+          "name": "Toggle User Status",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Authorization", "value": "Bearer {{adminToken}}"}],
+            "url": {"raw": "{{baseUrl}}/users/:id/toggle-status", "host": ["{{baseUrl}}"], "path": ["users", ":id", "toggle-status"], "variable": [{"key": "id", "value": "USER_ID"}]}
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{adminToken}}"}],
+            "url": {"raw": "{{baseUrl}}/users/:id", "host": ["{{baseUrl}}"], "path": ["users", ":id"], "variable": [{"key": "id", "value": "USER_ID"}]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bundles",
+      "item": [
+        {
+          "name": "Get All Bundles",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "{{baseUrl}}/bundles", "host": ["{{baseUrl}}"], "path": ["bundles"]}
+          }
+        },
+        {
+          "name": "Get Single Bundle",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "{{baseUrl}}/bundles/:id", "host": ["{{baseUrl}}"], "path": ["bundles", ":id"], "variable": [{"key": "id", "value": "BUNDLE_ID"}]}
+          }
+        },
+        {
+          "name": "Create Bundle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Bundle\",\n  \"description\": \"Test bundle description\",\n  \"price\": 750,\n  \"billingCycle\": \"monthly\",\n  \"items\": {\n    \"singleBedsheets\": 2,\n    \"doubleBedsheets\": 1,\n    \"pillowCovers\": 4,\n    \"curtains\": 1\n  }\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/bundles", "host": ["{{baseUrl}}"], "path": ["bundles"]}
+          }
+        },
+        {
+          "name": "Update Bundle",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Bundle\",\n  \"price\": 800\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/bundles/:id", "host": ["{{baseUrl}}"], "path": ["bundles", ":id"], "variable": [{"key": "id", "value": "BUNDLE_ID"}]}
+          }
+        },
+        {
+          "name": "Delete Bundle",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{adminToken}}"}],
+            "url": {"raw": "{{baseUrl}}/bundles/:id", "host": ["{{baseUrl}}"], "path": ["bundles", ":id"], "variable": [{"key": "id", "value": "BUNDLE_ID"}]}
+          }
+        },
+        {
+          "name": "Toggle Bundle Status",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Authorization", "value": "Bearer {{adminToken}}"}],
+            "url": {"raw": "{{baseUrl}}/bundles/:id/toggle-status", "host": ["{{baseUrl}}"], "path": ["bundles", ":id", "toggle-status"], "variable": [{"key": "id", "value": "BUNDLE_ID"}]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Calculations",
+      "item": [
+        {
+          "name": "Calculate Deposit",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"singleBeds\": 2,\n  \"doubleBeds\": 1,\n  \"curtainSets\": 2\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/calculate/deposit", "host": ["{{baseUrl}}"], "path": ["calculate", "deposit"]}
+          }
+        },
+        {
+          "name": "Calculate Pricing",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bundleId\": \"BUNDLE_ID\",\n  \"duration\": 6\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/calculate/pricing", "host": ["{{baseUrl}}"], "path": ["calculate", "pricing"]}
+          }
+        },
+        {
+          "name": "Get Discounts",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "{{baseUrl}}/calculate/discounts", "host": ["{{baseUrl}}"], "path": ["calculate", "discounts"]}
+          }
+        },
+        {
+          "name": "Get Pricing Config",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "{{baseUrl}}/calculate/pricing-config", "host": ["{{baseUrl}}"], "path": ["calculate", "pricing-config"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Quotes",
+      "item": [
+        {
+          "name": "Submit Quote",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessName\": \"Test Business\",\n  \"contactPerson\": \"John Doe\",\n  \"email\": \"john@testbusiness.com\",\n  \"phone\": \"9876543210\",\n  \"propertyDetails\": \"PG with 20 units, need bedding subscription for all rooms\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/quotes", "host": ["{{baseUrl}}"], "path": ["quotes"]}
+          }
+        },
+        {
+          "name": "Get All Quotes",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{adminToken}}"}],
+            "url": {"raw": "{{baseUrl}}/quotes", "host": ["{{baseUrl}}"], "path": ["quotes"]}
+          }
+        },
+        {
+          "name": "Update Quote Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"contacted\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/quotes/:id/status", "host": ["{{baseUrl}}"], "path": ["quotes", ":id", "status"], "variable": [{"key": "id", "value": "QUOTE_ID"}]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Get Overview",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{adminToken}}"}],
+            "url": {"raw": "{{baseUrl}}/analytics/overview", "host": ["{{baseUrl}}"], "path": ["analytics", "overview"]}
+          }
+        },
+        {
+          "name": "Get User Stats",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{adminToken}}"}],
+            "url": {"raw": "{{baseUrl}}/analytics/users", "host": ["{{baseUrl}}"], "path": ["analytics", "users"]}
+          }
+        }
+      ]
+    }
+  ]
+}

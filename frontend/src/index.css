@@ -1,0 +1,535 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Global Typography ───────────────────────────────────────────────────── */
+/* Playfair Display for all headings, Lora for body text */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  font-family: 'Lora', Georgia, 'Times New Roman', serif;
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6,
+.font-display {
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  letter-spacing: -0.01em;
+}
+
+/* Ant Design overrides — force Playfair on their heading components */
+.ant-typography h1,
+.ant-typography h2,
+.ant-typography h3,
+.ant-typography h4,
+.ant-typography h5,
+.ant-typography h6,
+.ant-card-head-title,
+.ant-modal-title,
+.ant-drawer-title,
+.ant-tabs-tab {
+  font-family: 'Playfair Display', Georgia, serif !important;
+}
+
+/* Lora for all other Ant Design text */
+.ant-btn,
+.ant-input,
+.ant-select,
+.ant-form-item-label,
+.ant-table,
+.ant-menu,
+.ant-dropdown-menu,
+.ant-message,
+.ant-tag,
+.ant-statistic-title,
+.ant-statistic-content {
+  font-family: 'Lora', Georgia, serif !important;
+}
+
+/* Tailwind font-bold headings should also use Playfair */
+.text-4xl, .text-5xl, .text-6xl, .text-7xl,
+.text-3xl, .text-2xl, .text-xl {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Smaller utility text stays Lora */
+.text-xs, .text-sm, .text-base {
+  font-family: 'Lora', Georgia, serif;
+}
+
+/* Modern Color Palette */
+:root {
+  /* Primary Blues */
+  --primary-900: #0F172A;
+  --primary-700: #1E3A8A;
+  --primary-500: #2563EB;
+  --primary-300: #93C5FD;
+  
+  /* Accent Teal */
+  --accent-500: #14B8A6;
+  --accent-400: #2DD4BF;
+  --accent-300: #5EEAD4;
+  
+  /* Neutral Backgrounds */
+  --bg-main: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #F1F5F9;
+  
+  /* Text Colors */
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --text-inverse: #FFFFFF;
+  
+  /* CTA Colors */
+  --cta-primary: #2563EB;
+  --cta-hover: #1D4ED8;
+  --cta-accent: #14B8A6;
+}
+
+/* Modern Gradients */
+.gradient-primary {
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
+}
+
+.gradient-accent {
+  background: linear-gradient(135deg, var(--accent-400) 0%, var(--accent-500) 100%);
+}
+
+.gradient-surface {
+  background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-elevated) 100%);
+}
+
+.gradient-hero {
+  background: linear-gradient(135deg, var(--primary-900) 0%, var(--primary-700) 50%, var(--primary-500) 100%);
+}
+
+.gradient-card {
+  background: linear-gradient(145deg, rgba(255,255,255,0.9) 0%, rgba(241,245,249,0.8) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* Modern Shadows */
+.shadow-modern {
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.1), 0 2px 4px -1px rgba(15, 23, 42, 0.06);
+}
+
+.shadow-modern-lg {
+  box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
+}
+
+.shadow-modern-xl {
+  box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
+}
+
+/* Glass Effect */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Modern Button Styles */
+.btn-modern-primary {
+  background: linear-gradient(135deg, var(--cta-primary) 0%, var(--cta-hover) 100%);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.3);
+}
+
+.btn-modern-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px 0 rgba(37, 99, 235, 0.4);
+}
+
+.btn-modern-accent {
+  background: linear-gradient(135deg, var(--accent-400) 0%, var(--accent-500) 100%);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px 0 rgba(20, 184, 166, 0.3);
+}
+
+.btn-modern-accent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px 0 rgba(20, 184, 166, 0.4);
+}
+
+/* Modern Card Styles */
+.card-modern {
+  background: var(--bg-surface);
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card-modern:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.1);
+}
+
+.card-modern-glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.1);
+}
+
+/* Modern Input Styles */
+.input-modern {
+  background: var(--bg-surface);
+  border: 2px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.input-modern:focus {
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  outline: none;
+}
+
+/* Modern Typography */
+.text-gradient-primary {
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-accent {
+  background: linear-gradient(135deg, var(--accent-400) 0%, var(--accent-500) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Modern Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(37, 99, 235, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(37, 99, 235, 0.5); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-elevated);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--primary-300) 0%, var(--primary-500) 100%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
+}
+
+/* Ant Design Overrides */
+.ant-layout {
+  background: var(--bg-main) !important;
+}
+
+.ant-card {
+  border-radius: 16px !important;
+  border: 1px solid rgba(148, 163, 184, 0.1) !important;
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.1) !important;
+}
+
+.ant-btn-primary {
+  background: linear-gradient(135deg, var(--cta-primary) 0%, var(--cta-hover) 100%) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-btn-primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px 0 rgba(37, 99, 235, 0.4) !important;
+}
+
+.ant-table-thead > tr > th {
+  background: var(--bg-elevated) !important;
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+  border-bottom: 2px solid rgba(148, 163, 184, 0.1) !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: rgba(37, 99, 235, 0.05) !important;
+}
+
+.ant-statistic-title {
+  color: var(--text-secondary) !important;
+  font-weight: 500 !important;
+}
+
+.ant-statistic-content {
+  color: var(--text-primary) !important;
+  font-weight: 700 !important;
+}
+
+/* Modern Tabs Styling */
+.modern-tabs .ant-tabs-tab {
+  border-radius: 12px !important;
+  margin: 0 4px !important;
+  padding: 8px 16px !important;
+  transition: all 0.3s ease !important;
+}
+
+.modern-tabs .ant-tabs-tab-active {
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%) !important;
+  color: var(--text-inverse) !important;
+  border: none !important;
+}
+
+.modern-tabs .ant-tabs-tab:hover {
+  background: rgba(37, 99, 235, 0.1) !important;
+  color: var(--primary-500) !important;
+}
+
+.modern-tabs .ant-tabs-ink-bar {
+  display: none !important;
+}
+
+/* Modern Drawer Styling */
+.modern-drawer .ant-drawer-header {
+  background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-elevated) 100%) !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1) !important;
+}
+
+/* Modern Select Styling */
+.ant-select-selector {
+  border-radius: 12px !important;
+  border: 2px solid rgba(148, 163, 184, 0.2) !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-select-focused .ant-select-selector {
+  border-color: var(--primary-500) !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+}
+
+/* Modern Form Item Labels */
+.ant-form-item-label > label {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+}
+
+/* Modern Alert Styling */
+.ant-alert {
+  border-radius: 12px !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+}
+
+/* Modern Checkbox Styling */
+.ant-checkbox-wrapper {
+  color: var(--text-primary) !important;
+}
+
+.ant-checkbox-checked .ant-checkbox-inner {
+  background-color: var(--primary-500) !important;
+  border-color: var(--primary-500) !important;
+}
+
+/* Modern Tag Styling */
+.ant-tag {
+  border-radius: 8px !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  font-weight: 500 !important;
+}
+
+/* Modern Divider Styling */
+.ant-divider-horizontal.ant-divider-with-text {
+  color: var(--text-muted) !important;
+  font-weight: 500 !important;
+}
+
+/* Modern Message Styling */
+.ant-message .ant-message-notice-content {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-elevated);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--primary-300) 0%, var(--primary-500) 100%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
+}
+
+/* Ant Design Overrides */
+.ant-layout {
+  background: var(--bg-main) !important;
+}
+
+.ant-card {
+  border-radius: 16px !important;
+  border: 1px solid rgba(148, 163, 184, 0.1) !important;
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.1) !important;
+}
+
+.ant-btn-primary {
+  background: linear-gradient(135deg, var(--cta-primary) 0%, var(--cta-hover) 100%) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-btn-primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px 0 rgba(37, 99, 235, 0.4) !important;
+}
+
+.ant-table-thead > tr > th {
+  background: var(--bg-elevated) !important;
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+  border-bottom: 2px solid rgba(148, 163, 184, 0.1) !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: rgba(37, 99, 235, 0.05) !important;
+}
+
+.ant-statistic-title {
+  color: var(--text-secondary) !important;
+  font-weight: 500 !important;
+}
+
+.ant-statistic-content {
+  color: var(--text-primary) !important;
+  font-weight: 700 !important;
+}
+
+/* Bento Grid equal-height rows */
+.bento-grid {
+  --card-h: 200px;
+  grid-template-rows: var(--card-h) var(--card-h) !important;
+}
+@media (min-width: 380px) {
+  .bento-grid { --card-h: 220px; }
+}
+@media (min-width: 480px) {
+  .bento-grid { --card-h: 240px; }
+}
+@media (min-width: 640px) {
+  .bento-grid { --card-h: 260px; gap: 12px !important; }
+}
+@media (min-width: 1024px) {
+  .bento-grid { --card-h: 290px; gap: 14px !important; }
+}
+@media (min-width: 1280px) {
+  .bento-grid { --card-h: 310px; }
+}
+
+/* Force Lora (not Playfair) inside bento cards so text stays compact */
+.bento-grid h3,
+.bento-grid h4,
+.bento-grid button,
+.bento-grid span,
+.bento-grid p,
+.bento-grid li {
+  font-family: 'Lora', Georgia, serif !important;
+  line-height: 1.35 !important;
+}
+
+/* Kill default browser/Playfair margins on headings inside bento */
+.bento-grid h3,
+.bento-grid h4 {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Recharts Chart Hover Effects */
+.recharts-bar-rectangle:hover {
+  transform: scaleY(1.05);
+  transform-origin: bottom;
+  transition: all 0.3s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Ant Design customizations */
+.ant-layout {
+  min-height: 100vh;
+}
+
+/* Responsive utilities */
+@media (max-width: 640px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 641px) {
+  .show-on-mobile {
+    display: none !important;
+  }
+}
