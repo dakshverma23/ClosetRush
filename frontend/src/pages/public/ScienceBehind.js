@@ -163,37 +163,25 @@ const ScienceBehindPage = () => {
   ];
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await api.get('/science-sections');
-        const dbData = response.data.sections || [];
-        
-        const formatted = CATEGORIES.map((cat, i) => {
-          const dbMatch = dbData.find(d => d.title.toLowerCase().includes(cat.key)) || {};
-          return {
-            ...dbMatch,
-            title: cat.title,
-            emoji: cat.emoji,
-            stat: dbMatch.stat || cat.stat,
-            statLabel: dbMatch.statLabel || cat.label,
-            order: i + 1,
-            dark: i % 2 === 0,
-            content: {
-              mainText: dbMatch.content?.mainText || "Our biological research proves that clinical environments influence cellular regeneration.",
-              bulletPoints: dbMatch.content?.bulletPoints || ["Molecular Cleanliness", "Hypoallergenic Sealing", "Fiber Restoration"],
-              additionalText: dbMatch.content?.additionalText || "Clinical Grade Verification"
-            },
-            images: dbMatch.images || []
-          };
-        });
-        setSections(formatted);
-      } catch (error) {
-        console.error("Fetch failed, using local config.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    // Use default categories data
+    const formatted = CATEGORIES.map((cat, i) => {
+      return {
+        title: cat.title,
+        emoji: cat.emoji,
+        stat: cat.stat,
+        statLabel: cat.label,
+        order: i + 1,
+        dark: i % 2 === 0,
+        content: {
+          mainText: "Our biological research proves that clinical environments influence cellular regeneration.",
+          bulletPoints: ["Molecular Cleanliness", "Hypoallergenic Sealing", "Fiber Restoration"],
+          additionalText: "Clinical Grade Verification"
+        },
+        images: []
+      };
+    });
+    setSections(formatted);
+    setLoading(false);
   }, []);
 
   if (loading) return <div className="h-screen flex items-center justify-center bg-[#050b14]"><Spin size="large" /></div>;
