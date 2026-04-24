@@ -31,31 +31,31 @@ export default function NewsletterSection() {
     <section className="relative overflow-hidden" style={{ background: "linear-gradient(to bottom, #ffffff, #f0f6ff)" }}>
 
       {/* ── Newsletter band ── */}
-      <div className="relative z-10 py-16 px-4">
+      <div className="relative z-10 py-8 md:py-16 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
 
             {/* Logo / illustration */}
             <motion.div
-              className="flex justify-center lg:justify-start"
+              className="flex justify-center lg:justify-start mb-6 lg:mb-0"
               initial={{ opacity: 0, x: -40 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               viewport={{ once: true }}
             >
               {newsletterLogo ? (
-                <img src={newsletterLogo} alt="Newsletter" className="w-56 h-56 object-contain drop-shadow-xl" />
+                <img src={newsletterLogo} alt="Newsletter" className="w-40 md:w-56 h-40 md:h-56 object-contain drop-shadow-xl" />
               ) : (
                 /* Brand card placeholder */
-                <div className="w-56 h-56 rounded-3xl flex flex-col items-center justify-center gap-3 shadow-xl"
+                <div className="w-40 md:w-56 h-40 md:h-56 rounded-3xl flex flex-col items-center justify-center gap-3 shadow-xl"
                   style={{ background: "#ffffff", border: "1px solid rgba(168,196,240,0.4)" }}
                 >
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold text-white"
+                  <div className="w-12 md:w-16 h-12 md:h-16 rounded-2xl flex items-center justify-center text-xl md:text-2xl font-bold text-white"
                     style={{ background: "linear-gradient(145deg,#1a3a8a,#3a7bd5)" }}
                   >
                     {brandName.slice(0, 2).toUpperCase()}
                   </div>
-                  <span className="text-lg font-bold" style={{ color: "#0f2a52" }}>{brandName}</span>
+                  <span className="text-base md:text-lg font-bold" style={{ color: "#0f2a52" }}>{brandName}</span>
                   <span className="text-xs text-center px-4" style={{ color: "#6a8aaa" }}>
                     Fresh bedding subscription service
                   </span>
@@ -70,14 +70,14 @@ export default function NewsletterSection() {
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               viewport={{ once: true }}
             >
-              <h2 className="text-3xl md:text-4xl font-bold mb-3" style={{ color: "#0f2a52" }}>
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2 md:mb-3" style={{ color: "#0f2a52" }}>
                 Stay Fresh, Stay Informed!
               </h2>
-              <p className="text-lg mb-6" style={{ color: "#4a6a8a" }}>
+              <p className="text-base md:text-lg mb-4 md:mb-6" style={{ color: "#4a6a8a" }}>
                 Let's subscribe with us and find the fun.
               </p>
 
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <div className="flex-1 flex items-center gap-2 px-4 rounded-xl h-12 border-2"
                   style={{ background: "#fff", borderColor: "rgba(168,196,240,0.6)" }}
                 >
@@ -121,7 +121,7 @@ export default function NewsletterSection() {
       </div>
 
       {/* ── Footer ── */}
-      <div className="relative text-white pt-12 pb-8"
+      <div className="relative text-white pt-12 pb-8 hidden md:block"
         style={{ background: "linear-gradient(160deg,#0f2a52 0%,#1a3a8a 50%,#0d2448 100%)" }}
       >
         {/* Dot grid */}
@@ -130,10 +130,10 @@ export default function NewsletterSection() {
         />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
 
-            {/* Brand */}
-            <div className="md:col-span-1">
+            {/* Brand - Hidden on desktop */}
+            <div className="md:col-span-1 hidden">
               <div className="flex items-center gap-2.5 mb-4">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm"
                   style={{ background: "rgba(168,196,240,0.2)", border: "1px solid rgba(168,196,240,0.3)", color: "#a8c4f0" }}

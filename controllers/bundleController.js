@@ -79,7 +79,16 @@ const getBundleById = async (req, res, next) => {
  */
 const createBundle = async (req, res, next) => {
   try {
-    const { name, items, price, securityDeposit, billingCycle, description, image } = req.body;
+    let { name, items, price, securityDeposit, billingCycle, description } = req.body;
+
+    // Parse items if it's a string (from FormData)
+    if (typeof items === 'string') {
+      try {
+        items = JSON.parse(items);
+      } catch (e) {
+        throw ApiError.badRequest('Invalid items format');
+      }
+    }
 
     // Validate required fields
     if (!name || !price) {
@@ -117,6 +126,9 @@ const createBundle = async (req, res, next) => {
       }
     }
 
+    // Get image URL from uploaded file
+    const image = req.file ? req.file.path : '';
+
     const bundle = await Bundle.create({
       name,
       items,
@@ -124,7 +136,7 @@ const createBundle = async (req, res, next) => {
       securityDeposit: securityDeposit || 0,
       billingCycle: billingCycle || 'monthly',
       description,
-      image: image || ''
+      image
     });
 
     await bundle.populate('items.category');
@@ -146,7 +158,16 @@ const createBundle = async (req, res, next) => {
  */
 const updateBundle = async (req, res, next) => {
   try {
-    const { name, items, price, securityDeposit, billingCycle, description, image } = req.body;
+    let { name, items, price, securityDeposit, billingCycle, description } = req.body;
+
+    // Parse items if it's a string (from FormData)
+    if (typeof items === 'string') {
+      try {
+        items = JSON.parse(items);
+      } catch (e) {
+        throw ApiError.badRequest('Invalid items format');
+      }
+    }
 
     const bundle = await Bundle.findById(req.params.id);
 
@@ -199,7 +220,11 @@ const updateBundle = async (req, res, next) => {
     
     if (billingCycle) bundle.billingCycle = billingCycle;
     if (description !== undefined) bundle.description = description;
-    if (image !== undefined) bundle.image = image;
+    
+    // Update image if new file uploaded
+    if (req.file) {
+      bundle.image = req.file.path;
+    }
 
     await bundle.save();
     await bundle.populate('items.category');
@@ -286,11 +311,33 @@ const deleteBundle = async (req, res, next) => {
   }
 };
 
+/**
+ * Upload bundle image (Admin only)
+ * POST /api/bundles/upload-image
+ */
+const uploadImage = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      throw ApiError.badRequest('No image file provided');
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Image uploaded successfully',
+      imageUrl: req.file.path
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getAllBundles,
   getBundleById,
   createBundle,
   updateBundle,
   toggleBundleStatus,
-  deleteBundle
+  deleteBundle,
+  uploadImage
 };

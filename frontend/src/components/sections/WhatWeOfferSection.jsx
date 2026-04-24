@@ -30,6 +30,7 @@ export default function WhatWeOfferSection() {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
   const [current, setCurrent] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const [videoUrl, setVideoUrl] = useState(localStorage.getItem("offerVideo") || "");
 
   const handleSubscribe = () => {
@@ -39,9 +40,10 @@ export default function WhatWeOfferSection() {
   };
 
   useEffect(() => {
+    if (isPaused) return; // Don't run interval when paused
     const t = setInterval(() => setCurrent(p => (p + 1) % otherBundles.length), 4000);
     return () => clearInterval(t);
-  }, []);
+  }, [isPaused]); // Re-run effect when isPaused changes
 
   useEffect(() => {
     const handler = () => setVideoUrl(localStorage.getItem("offerVideo") || "");
@@ -180,7 +182,6 @@ export default function WhatWeOfferSection() {
                 <div className="absolute bottom-2 left-2 px-2 py-1 rounded-lg text-[9px] sm:text-xs font-semibold text-white"
                   style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)" }}
                 >
-                  ▶ ClosetRush in Action
                 </div>
               </>
             ) : (
@@ -225,6 +226,8 @@ export default function WhatWeOfferSection() {
               backdropFilter: "blur(16px)",
             }}
             whileHover={{ scale: 1.012, transition: { duration: 0.22 } }}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
           >
             <div className="absolute inset-0 flex flex-col p-2 sm:p-5">
               {/* header + dots */}

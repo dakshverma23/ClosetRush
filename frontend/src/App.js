@@ -40,7 +40,7 @@ import AdminQuotesPage from './pages/admin/AdminQuotesPage';
 import AdminAnalyticsPage from './pages/admin/AdminAnalyticsPage';
 import BrandSettingsPage from './pages/admin/BrandSettingsPage';
 import InventoryManagementPage from './pages/admin/InventoryManagementPage';
-import ScienceSectionsPage from './pages/admin/ScienceSectionsPage';
+import BundlesManagementPage from './pages/admin/BundlesManagementPage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
@@ -224,10 +224,10 @@ function AppRoutes() {
         } 
       />
       <Route 
-        path="/admin/science-sections" 
+        path="/admin/bundles" 
         element={
           <ProtectedRoute allowedRoles={['admin']}>
-            <ScienceSectionsPage />
+            <BundlesManagementPage />
           </ProtectedRoute>
         } 
       />

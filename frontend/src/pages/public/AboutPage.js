@@ -1,5 +1,7 @@
 import React from 'react';
 import { Layout } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import { 
@@ -19,6 +21,21 @@ import {
 const { Content } = Layout;
 
 const AboutPage = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  const handleGetStarted = () => {
+    if (!isAuthenticated()) {
+      navigate('/login');
+    } else {
+      navigate('/subscriptions/individual');
+    }
+  };
+
+  const handleScheduleConsultation = () => {
+    navigate('/get-quote');
+  };
+
   return (
     <Layout className="min-h-screen bg-[#F8FAFC]">
       <Navbar />
@@ -736,7 +753,7 @@ const AboutPage = () => {
         </section>
 
         {/* Final CTA */}
-        <section className="py-20 bg-gradient-to-br from-[#2563EB] to-[#14B8A6]">
+        <section className="py-20 bg-gradient-to-br from-[#14B8A6] to-[#0F766E]">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="font-display text-4xl lg:text-5xl font-bold text-white mb-6">
               Ready to Experience the Difference?
@@ -745,10 +762,16 @@ const AboutPage = () => {
               Join thousands of satisfied customers who've transformed their garment care routine
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-4 bg-white text-[#2563EB] font-body font-semibold rounded-full shadow-modern-lg hover:shadow-modern-xl transition-all duration-300 hover:scale-105">
+              <button 
+                onClick={handleGetStarted}
+                className="px-8 py-4 bg-white text-[#14B8A6] font-body font-semibold rounded-full shadow-modern-lg hover:shadow-modern-xl transition-all duration-300 hover:scale-105"
+              >
                 Get Started Today
               </button>
-              <button className="px-8 py-4 bg-white/10 backdrop-blur-md text-white font-body font-semibold rounded-full border-2 border-white/30 hover:bg-white/20 transition-all duration-300">
+              <button 
+                onClick={handleScheduleConsultation}
+                className="px-8 py-4 bg-white/10 backdrop-blur-md text-white font-body font-semibold rounded-full border-2 border-white/30 hover:bg-white/20 transition-all duration-300"
+              >
                 Schedule a Consultation
               </button>
             </div>

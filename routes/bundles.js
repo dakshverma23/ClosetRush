@@ -3,6 +3,7 @@ const router = express.Router();
 const bundleController = require('../controllers/bundleController');
 const { authenticate, optionalAuth } = require('../middleware/auth');
 const { requireAdmin } = require('../middleware/rbac');
+const { upload } = require('../config/cloudinary');
 
 /**
  * @route   GET /api/bundles
@@ -23,14 +24,21 @@ router.get('/:id', bundleController.getBundleById);
  * @desc    Create new bundle
  * @access  Admin only
  */
-router.post('/', authenticate, requireAdmin, bundleController.createBundle);
+router.post('/', authenticate, requireAdmin, upload.single('image'), bundleController.createBundle);
 
 /**
  * @route   PUT /api/bundles/:id
  * @desc    Update bundle
  * @access  Admin only
  */
-router.put('/:id', authenticate, requireAdmin, bundleController.updateBundle);
+router.put('/:id', authenticate, requireAdmin, upload.single('image'), bundleController.updateBundle);
+
+/**
+ * @route   POST /api/bundles/upload-image
+ * @desc    Upload bundle image
+ * @access  Admin only
+ */
+router.post('/upload-image', authenticate, requireAdmin, upload.single('image'), bundleController.uploadImage);
 
 /**
  * @route   PATCH /api/bundles/:id/status

@@ -41,14 +41,10 @@ export default function WhatHappensSection() {
             onClick={() => setShowChart(v => !v)}
             className="group flex items-center gap-2.5 px-6 py-3 rounded-2xl font-semibold text-sm transition-all duration-300 hover:scale-105"
             style={{
-              background: showChart
-                ? "linear-gradient(135deg,#1a3a8a,#3a7bd5)"
-                : "rgba(168,196,240,0.12)",
-              color: showChart ? "#ffffff" : "#2a5fc7",
-              border: showChart
-                ? "1px solid transparent"
-                : "1px solid rgba(168,196,240,0.4)",
-              boxShadow: showChart ? "0 8px 24px rgba(42,95,199,0.3)" : "none",
+              background: "linear-gradient(135deg,#0F172A,#1E3A8A)",
+              color: "#ffffff",
+              border: "1px solid rgba(255,255,255,0.1)",
+              boxShadow: "0 8px 24px rgba(15,23,42,0.3)",
             }}
           >
             <ExperimentOutlined style={{ fontSize: 15 }} />

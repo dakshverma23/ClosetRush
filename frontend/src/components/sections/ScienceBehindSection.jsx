@@ -118,9 +118,124 @@ function CardImage({ cardId, isDark }) {
 }
 
 // ── Card component ────────────────────────────────────────────────────────────
-function Card({ card, delay }) {
+function Card({ card, delay, isExpanded, onToggle, isMobile }) {
   const isDark = card.dark;
 
+  // Mobile accordion view
+  if (isMobile) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.88, y: 24 }}
+        whileInView={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
+        viewport={{ once: true }}
+        onClick={onToggle}
+        className="rounded-2xl overflow-hidden cursor-pointer"
+        style={{
+          background: isExpanded 
+            ? (isDark ? BLUE : "#ffffff") 
+            : (isDark ? "linear-gradient(135deg,#0F172A,#1E3A8A)" : "#ffffff"),
+          boxShadow: isExpanded 
+            ? (isDark ? "0 16px 48px rgba(42,95,199,0.35)" : "0 8px 32px rgba(90,130,200,0.13)")
+            : (isDark ? "0 8px 24px rgba(15,23,42,0.3)" : "0 4px 16px rgba(90,130,200,0.08)"),
+          border: isExpanded 
+            ? (isDark ? "none" : "1px solid rgba(168,196,240,0.35)") 
+            : (isDark ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(168,196,240,0.2)"),
+          transition: "all 0.3s ease",
+        }}
+      >
+        {/* Header - Always visible */}
+        <div className="p-4 flex items-center justify-between gap-3">
+          {/* Left: icon + title */}
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+              style={{
+                background: isExpanded 
+                  ? (isDark ? "rgba(255,255,255,0.15)" : "rgba(168,196,240,0.15)")
+                  : (isDark ? "rgba(255,255,255,0.1)" : "rgba(168,196,240,0.1)"),
+                border: isExpanded
+                  ? (isDark ? "1px solid rgba(255,255,255,0.2)" : "1px solid rgba(168,196,240,0.3)")
+                  : (isDark ? "1px solid rgba(255,255,255,0.15)" : "1px solid rgba(168,196,240,0.2)"),
+              }}
+            >
+              {card.emoji}
+            </div>
+            <h3 
+              className="text-sm font-bold leading-tight truncate" 
+              style={{ color: (isExpanded ? (isDark ? "#fff" : "#0f2a52") : (isDark ? "#ffffff" : "#0f2a52")) }}
+            >
+              {card.title}
+            </h3>
+          </div>
+
+          {/* Right: Image */}
+          <div className="flex-shrink-0">
+            <CardImage cardId={card.id} isDark={(isExpanded && isDark) || (!isExpanded && isDark)} />
+          </div>
+        </div>
+
+        {/* Expandable content */}
+        <motion.div
+          initial={false}
+          animate={{
+            height: isExpanded ? "auto" : 0,
+            opacity: isExpanded ? 1 : 0,
+          }}
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          style={{ overflow: "hidden" }}
+        >
+          <div className="px-4 pb-4">
+            {/* Stat */}
+            <div className="flex items-baseline gap-1 mb-2">
+              <span 
+                className="text-lg font-bold leading-none" 
+                style={{ color: isExpanded ? (isDark ? "#a8c4f0" : "#2a5fc7") : "#2a5fc7" }}
+              >
+                {card.stat}
+              </span>
+              <span 
+                className="text-xs font-medium" 
+                style={{ color: isExpanded ? (isDark ? "rgba(168,196,240,0.7)" : "#6a8aaa") : "#6a8aaa" }}
+              >
+                {card.statLabel}
+              </span>
+            </div>
+
+            {/* Description */}
+            <p 
+              className="text-xs leading-relaxed mb-3" 
+              style={{ color: isExpanded ? (isDark ? "rgba(247, 244, 244, 1)" : "#01172dff") : "#01172dff" }}
+            >
+              {card.desc}
+            </p>
+
+            {/* Bullets */}
+            <ul className="space-y-1.5">
+              {card.bullets.map((b, i) => (
+                <motion.li
+                  key={i}
+                  className="flex items-start gap-1.5 text-xs"
+                  style={{ color: isExpanded ? (isDark ? "rgba(246, 242, 242, 1)" : "#022f5cff") : "#022f5cff" }}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2, delay: i * 0.03 }}
+                >
+                  <span
+                    className="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-[3px]"
+                    style={{ background: isExpanded ? (isDark ? "#ffffffff" : "#2a5fc7ff") : "#2a5fc7ff" }}
+                  />
+                  {b}
+                </motion.li>
+              ))}
+            </ul>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  }
+
+  // Desktop view - unchanged
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.88, y: 24 }}
@@ -224,6 +339,23 @@ function Dot({ cx, cy, delay = 0 }) {
 export default function ScienceBehindSection({ embedded = false }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const [expandedIndex, setExpandedIndex] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile view
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640); // sm breakpoint
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const handleToggle = (index) => {
+    setExpandedIndex(expandedIndex === index ? null : index);
+  };
 
   const content = (
     <div className={`relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 ${embedded ? "" : "py-12 sm:py-16 lg:py-20"}`}>
@@ -283,7 +415,14 @@ export default function ScienceBehindSection({ embedded = false }) {
         {/* Cards grid */}
         <div className="relative grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8" style={{ zIndex: 1 }}>
           {cards.map((card, i) => (
-            <Card key={card.id} card={card} delay={0.4 + i * 0.15} />
+            <Card 
+              key={card.id} 
+              card={card} 
+              delay={0.4 + i * 0.15}
+              isExpanded={expandedIndex === i}
+              onToggle={() => handleToggle(i)}
+              isMobile={isMobile}
+            />
           ))}
         </div>
       </div>

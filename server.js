@@ -55,7 +55,6 @@ app.use('/api/quotes', require('./routes/quotes'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/inventory-management', require('./routes/inventoryManagement'));
-app.use('/api/science-sections', require('./routes/scienceSections'));
 
 // 404 handler
 app.use((req, res) => {

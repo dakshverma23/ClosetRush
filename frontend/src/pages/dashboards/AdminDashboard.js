@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Card, Row, Col, Statistic, Table, Tag, Button, message, Modal, Form, Input, InputNumber, Select, Spin, Tabs, Drawer, Avatar, Dropdown, Descriptions, Divider } from 'antd';
+import { Layout, Card, Row, Col, Statistic, Table, Tag, Button, message, Modal, Form, Input, InputNumber, Select, Spin, Tabs, Drawer, Avatar, Dropdown, Descriptions, Divider, Upload, Image } from 'antd';
 import {
   UserOutlined,
   ShoppingOutlined,
@@ -18,7 +18,9 @@ import {
   TeamOutlined,
   FileTextOutlined,
   SettingOutlined,
-  DatabaseOutlined
+  DatabaseOutlined,
+  UploadOutlined,
+  PictureOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -46,6 +48,8 @@ const AdminDashboard = () => {
   const [mobileDrawerVisible, setMobileDrawerVisible] = useState(false);
   const [activeTab, setActiveTab] = useState('users');
   const [bundleItems, setBundleItems] = useState([]);
+  const [bundleImage, setBundleImage] = useState(null);
+  const [bundleImagePreview, setBundleImagePreview] = useState('');
   const [form] = Form.useForm();
   const [userForm] = Form.useForm();
   const navigate = useNavigate();
@@ -97,6 +101,8 @@ const AdminDashboard = () => {
   const handleAddBundle = () => {
     setEditingBundle(null);
     setBundleItems([{ category: '', quantity: 1 }]);
+    setBundleImage(null);
+    setBundleImagePreview('');
     form.resetFields();
     setIsBundleModalVisible(true);
   };
@@ -124,6 +130,8 @@ const AdminDashboard = () => {
     }
     
     setBundleItems(items);
+    setBundleImagePreview(bundle.image || '');
+    setBundleImage(null);
     form.setFieldsValue({
       name: bundle.name,
       description: bundle.description,
@@ -149,6 +157,16 @@ const AdminDashboard = () => {
     setBundleItems(newItems);
   };
 
+  const handleImageChange = (info) => {
+    const file = info.file.originFileObj || info.file;
+    if (file) {
+      setBundleImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => setBundleImagePreview(e.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSaveBundle = async (values) => {
     try {
       // Validate bundle items
@@ -168,26 +186,36 @@ const AdminDashboard = () => {
         }
       }
 
-      const bundleData = {
-        name: values.name,
-        description: values.description,
-        price: values.price,
-        securityDeposit: values.securityDeposit || 0,
-        billingCycle: values.billingCycle,
-        items: bundleItems
-      };
+      const formData = new FormData();
+      formData.append('name', values.name);
+      formData.append('description', values.description);
+      formData.append('price', values.price);
+      formData.append('securityDeposit', values.securityDeposit || 0);
+      formData.append('billingCycle', values.billingCycle);
+      formData.append('items', JSON.stringify(bundleItems));
+      
+      // Add image if selected
+      if (bundleImage) {
+        formData.append('image', bundleImage);
+      }
 
       if (editingBundle) {
-        await api.put(`/bundles/${editingBundle._id}`, bundleData);
+        await api.put(`/bundles/${editingBundle._id}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
         message.success('Bundle updated successfully');
       } else {
-        await api.post('/bundles', bundleData);
+        await api.post('/bundles', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
         message.success('Bundle created successfully');
       }
 
       setIsBundleModalVisible(false);
       form.resetFields();
       setBundleItems([]);
+      setBundleImage(null);
+      setBundleImagePreview('');
       fetchDashboardData();
     } catch (error) {
       message.error(error.response?.data?.message || 'Failed to save bundle');
@@ -1286,6 +1314,8 @@ const AdminDashboard = () => {
             onCancel={() => {
               setIsBundleModalVisible(false);
               form.resetFields();
+              setBundleImage(null);
+              setBundleImagePreview('');
             }}
             footer={null}
             width={600}
@@ -1305,6 +1335,43 @@ const AdminDashboard = () => {
                 rules={[{ required: true, message: 'Please enter description' }]}
               >
                 <TextArea rows={3} placeholder="Bundle description" />
+              </Form.Item>
+
+              <Form.Item label="Bundle Image">
+                <Upload
+                  listType="picture-card"
+                  maxCount={1}
+                  beforeUpload={() => false}
+                  onChange={handleImageChange}
+                  onRemove={() => {
+                    setBundleImage(null);
+                    setBundleImagePreview('');
+                  }}
+                  showUploadList={!bundleImagePreview}
+                >
+                  {!bundleImagePreview && (
+                    <div>
+                      <PictureOutlined />
+                      <div style={{ marginTop: 8 }}>Upload</div>
+                    </div>
+                  )}
+                </Upload>
+                {bundleImagePreview && (
+                  <div style={{ marginTop: 8 }}>
+                    <Image src={bundleImagePreview} width={200} style={{ borderRadius: 8 }} />
+                    <Button 
+                      danger 
+                      size="small" 
+                      onClick={() => {
+                        setBundleImage(null);
+                        setBundleImagePreview('');
+                      }}
+                      style={{ marginTop: 8 }}
+                    >
+                      Remove Image
+                    </Button>
+                  </div>
+                )}
               </Form.Item>
 
               <Row gutter={16}>

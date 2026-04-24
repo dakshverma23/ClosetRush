@@ -5,13 +5,13 @@ import { ArrowRightOutlined, FireFilled, TagOutlined } from "@ant-design/icons";
 // ── Config — change these to update the banner ────────────────────────────────
 const BANNER_CONFIG = {
   badge: "🔥 Limited Time Offer",
-  headline: "Get Your First Month Free",
+  headline: " Save upto ₹1200",
   subtext: "Fresh bedsheets delivered to your door. No commitment. Cancel anytime.",
-  highlight: "Save ₹299",
+  highlight: "20% off",
   ctaLabel: "Claim Offer Now",
   ctaPath: "/register",          // ← change this later to any route
   secondaryLabel: "View Plans",
-  secondaryPath: "/pricing",
+  secondaryPath: "/what-we-offer",
 };
 // ─────────────────────────────────────────────────────────────────────────────
 
