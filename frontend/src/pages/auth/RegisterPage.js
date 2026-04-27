@@ -141,11 +141,11 @@ const RegisterPage = () => {
             </Button>
             
             <div className="mt-8 text-center">
-              <Paragraph className="text-text-secondary">
+              <Paragraph className="text-gray-700 text-base">
                 Already have an account?{' '}
                 <Link 
                   to="/login" 
-                  className="text-gradient-primary font-semibold hover:underline transition-all duration-300"
+                  className="text-primary-600 font-semibold hover:text-primary-700 hover:underline transition-all duration-300"
                 >
                   Sign in here
                 </Link>

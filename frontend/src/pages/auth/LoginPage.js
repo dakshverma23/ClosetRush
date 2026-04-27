@@ -177,11 +177,11 @@ const LoginPage = () => {
             </Button>
             
             <div className="mt-8 text-center">
-              <Paragraph className="text-text-secondary">
+              <Paragraph className="text-gray-700 text-base">
                 Don't have an account?{' '}
                 <Link 
                   to="/register" 
-                  className="text-gradient-primary font-semibold hover:underline transition-all duration-300"
+                  className="text-primary-600 font-semibold hover:text-primary-700 hover:underline transition-all duration-300"
                 >
                   Sign up for free
                 </Link>

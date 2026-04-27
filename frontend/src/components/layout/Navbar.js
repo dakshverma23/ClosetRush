@@ -5,7 +5,6 @@ import {
   HomeOutlined,
   InfoCircleOutlined,
   ShoppingOutlined,
-  DollarOutlined,
   UserOutlined,
   LogoutOutlined,
   DashboardOutlined,
@@ -13,291 +12,193 @@ import {
   MenuOutlined,
   DownOutlined,
 } from '@ant-design/icons';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 
 const navLinks = [
-  { key: 'home',    label: 'Home',          to: '/',               icon: <HomeOutlined /> },
-  { key: 'science', label: 'This Ain"t" Optional',        to: '/science-behind', icon: <InfoCircleOutlined /> },
+  { key: 'home',    label: 'Home',           to: '/',               icon: <HomeOutlined /> },
+  { key: 'science', label: "This Ain't Optional", to: '/science-behind', icon: <InfoCircleOutlined /> },
   { key: 'offers',  label: 'What We Offer',  to: '/what-we-offer',  icon: <ShoppingOutlined /> },
   { key: 'about',   label: 'About',          to: '/about',          icon: <InfoCircleOutlined /> },
 ];
 
 const Navbar = () => {
-  const [open, setOpen]         = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [brandLogo]             = useState(localStorage.getItem('brandLogo') || '');
-  const [brandName]             = useState(localStorage.getItem('brandName') || 'ClosetRush');
+  const [open, setOpen] = useState(false);
+  const [brandLogo] = useState(localStorage.getItem('brandLogo') || '');
+  const [brandName] = useState(localStorage.getItem('brandName') || 'ClosetRush');
   const { isAuthenticated, user, logout } = useAuth();
-  const navigate  = useNavigate();
-  const location  = useLocation();
-  const menuRef   = useRef(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const menuRef = useRef(null);
 
-  /* ── scroll shadow ── */
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  // ── Scroll Animations for Desktop Capsule Effect ──
+  const { scrollY } = useScroll();
+  
+  const navWidth = useTransform(scrollY, [0, 100], ['100%', '92%']);
+  const navTop = useTransform(scrollY, [0, 100], ['0px', '24px']);
+  const navRadius = useTransform(scrollY, [0, 100], ['0px', '40px']);
+  const navBgOpacity = useTransform(scrollY, [0, 100], [0.9, 1]);
+  const navShadow = useTransform(
+    scrollY, 
+    [0, 100], 
+    ['0px 0px 0px rgba(0,0,0,0)', '0px 25px 50px -12px rgba(0,0,0,0.15)']
+  );
 
-  /* ── close mobile menu on route change ── */
   useEffect(() => { setOpen(false); }, [location.pathname]);
 
-  /* ── close on outside click ── */
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
-
-  /* ── lock body scroll when mobile menu open ── */
-  useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [open]);
-
-  const subscriptionPath = () => {
+  const signUpPath = () => {
     if (!isAuthenticated()) return '/register';
-    if (user?.userType === 'business') return '/business/subscriptions';
-    return '/subscriptions';
+    return user?.userType === 'business' ? '/business/subscriptions' : '/subscriptions';
   };
 
   const dashboardPath = () => {
-    if (user?.userType === 'admin')    return '/admin/dashboard';
+    if (user?.userType === 'admin') return '/admin/dashboard';
     if (user?.userType === 'business') return '/business/dashboard';
     return '/dashboard';
   };
 
-  const isActive = (to) =>
-    to === '/' ? location.pathname === '/' : location.pathname.startsWith(to);
+  const isActive = (to) => to === '/' ? location.pathname === '/' : location.pathname.startsWith(to);
 
   const userDropdownItems = [
-    {
-      key: 'dashboard', icon: <DashboardOutlined />, label: 'Dashboard',
-      onClick: () => navigate(dashboardPath()),
-    },
-    {
-      key: 'subscriptions', icon: <ShoppingOutlined />, label: 'My Subscriptions',
-      onClick: () => navigate(subscriptionPath()),
-    },
+    { key: 'dashboard', icon: <DashboardOutlined />, label: 'Dashboard', onClick: () => navigate(dashboardPath()) },
+    { key: 'subscriptions', icon: <ShoppingOutlined />, label: 'My Subscriptions', onClick: () => navigate(signUpPath()) },
     { type: 'divider' },
-    {
-      key: 'logout', icon: <LogoutOutlined />, label: 'Logout',
-      danger: true, onClick: logout,
-    },
+    { key: 'logout', icon: <LogoutOutlined />, label: 'Logout', danger: true, onClick: logout },
   ];
 
   return (
     <>
-      {/* ── NAVBAR BAR ── */}
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? 'bg-white/95 backdrop-blur-md shadow-md border-b border-slate-100'
-            : 'bg-white/80 backdrop-blur-sm'
-        }`}
-        style={{ height: 64 }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
+      <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pointer-events-none">
+        <motion.header
+          className="bg-white border border-slate-100 flex items-center pointer-events-auto"
+          style={{
+            height: 80,
+            width: navWidth,
+            marginTop: navTop,
+            borderRadius: navRadius,
+            backgroundColor: `rgba(255, 255, 255, ${navBgOpacity})`,
+            backdropFilter: 'blur(16px)',
+            boxShadow: navShadow,
+            transition: 'width 0.4s cubic-bezier(0.25, 1, 0.5, 1)' 
+          }}
+        >
+          <div className="w-full max-w-7xl mx-auto px-8 flex items-center justify-between">
+            
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-3 group flex-shrink-0">
+              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shadow-sm transition-transform duration-500 group-hover:rotate-6 ${
+                !brandLogo ? 'bg-gradient-to-br from-slate-900 to-blue-800' : ''
+              }`}>
+                {brandLogo 
+                  ? <img src={brandLogo} alt={brandName} className="w-full h-full object-contain rounded-2xl" />
+                  : <span className="text-white font-black text-lg">{brandName.slice(0, 2).toUpperCase()}</span>
+                }
+              </div>
+              <span className="text-2xl font-black tracking-tighter text-slate-900 hidden sm:block">
+                {brandName}
+              </span>
+            </Link>
 
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow transition-all duration-300 group-hover:shadow-md ${
-              !brandLogo ? 'bg-gradient-to-br from-blue-600 to-cyan-500' : ''
-            }`}>
-              {brandLogo
-                ? <img src={brandLogo} alt={brandName} className="w-full h-full object-contain rounded-xl" />
-                : <span className="text-white font-bold text-base">{brandName.slice(0, 2).toUpperCase()}</span>
-              }
-            </div>
-            <span className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors duration-200">
-              {brandName}
-            </span>
-          </Link>
+            {/* Desktop Navigation Links */}
+            <nav className="hidden lg:flex items-center gap-1.5 bg-slate-100/50 p-1.5 rounded-[22px] border border-slate-200/50">
+              {navLinks.map(({ key, label, to }) => {
+                const active = isActive(to);
+                return (
+                  <Link
+                    key={key}
+                    to={to}
+                    className={`px-6 py-2.5 rounded-[18px] text-sm font-bold transition-all duration-300 ${
+                      active
+                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
+                        : 'text-slate-500 hover:text-slate-900 hover:bg-white/80'
+                    }`}
+                  >
+                    {label}
+                  </Link>
+                );
+              })}
+            </nav>
 
-          {/* ── Desktop nav ── */}
-          <nav className="hidden lg:flex items-center gap-1">
-            {navLinks.map(({ key, label, to }) => (
-              <Link
-                key={key}
-                to={to}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  isActive(to)
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                }`}
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
-
-          {/* ── Desktop right actions ── */}
-          <div className="hidden lg:flex items-center gap-3">
-            {/* Subscribe CTA */}
-            <button
-              onClick={() => navigate(subscriptionPath())}
-              className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:shadow-lg hover:scale-105"
-              style={{ background: 'linear-gradient(135deg,#2563eb,#0ea5e9)' }}
-            >
-              {isAuthenticated()
-                ? user?.userType === 'business' ? 'Get a Quote' : 'Subscribe Now'
-                : 'Subscribe Now'}
-            </button>
-
-            {isAuthenticated() ? (
-              <Dropdown menu={{ items: userDropdownItems }} placement="bottomRight" trigger={['click']}>
-                <button className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-slate-50 transition-all duration-200 border border-slate-200">
-                  <Avatar size={28} icon={<UserOutlined />} className="bg-blue-600" />
-                  <span className="text-sm font-medium text-slate-700 max-w-[100px] truncate">{user?.name}</span>
-                  <DownOutlined className="text-slate-400 text-xs" />
-                </button>
-              </Dropdown>
-            ) : (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => navigate('/login')}
-                  className="px-4 py-2 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 border border-slate-200 transition-all duration-200"
-                >
-                  Log in
-                </button>
+            {/* Desktop Right Action */}
+            <div className="hidden lg:flex items-center gap-5">
+              {isAuthenticated() ? (
+                <Dropdown menu={{ items: userDropdownItems }} placement="bottomRight" trigger={['click']}>
+                  <button className="flex items-center gap-3 p-1 pr-4 rounded-full hover:bg-slate-50 transition-all border border-slate-100 bg-white">
+                    <Avatar size={36} icon={<UserOutlined />} className="bg-slate-900" />
+                    <span className="text-sm font-black text-slate-800 tracking-tight">{user?.name?.split(' ')[0]}</span>
+                    <DownOutlined className="text-slate-400 text-[10px]" />
+                  </button>
+                </Dropdown>
+              ) : (
                 <button
                   onClick={() => navigate('/register')}
-                  className="px-4 py-2 rounded-xl text-sm font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-all duration-200"
+                  className="px-8 py-3 rounded-full text-sm font-black text-white transition-all duration-300 hover:shadow-2xl hover:scale-105 active:scale-95"
+                  style={{ 
+                    background: 'linear-gradient(135deg, #0F172A 0%, #2563EB 100%)',
+                  }}
                 >
                   Sign up
                 </button>
-              </div>
-            )}
+              )}
+            </div>
+
+            {/* Mobile Hamburger Menu Toggle */}
+            <button
+              className="lg:hidden w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-900"
+              onClick={() => setOpen(v => !v)}
+            >
+              <AnimatePresence mode="wait">
+                {open ? (
+                  <motion.div key="close" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <CloseOutlined />
+                  </motion.div>
+                ) : (
+                  <motion.div key="menu" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <MenuOutlined />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </button>
           </div>
+        </motion.header>
+      </div>
 
-          {/* ── Mobile hamburger ── */}
-          <button
-            className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-all duration-200"
-            onClick={() => setOpen(v => !v)}
-            aria-label="Toggle menu"
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              {open
-                ? <motion.span key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
-                    <CloseOutlined className="text-slate-700 text-base" />
-                  </motion.span>
-                : <motion.span key="menu" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
-                    <MenuOutlined className="text-slate-700 text-base" />
-                  </motion.span>
-              }
-            </AnimatePresence>
-          </button>
-        </div>
-      </header>
-
-      {/* ── MOBILE MENU OVERLAY ── */}
+      {/* Mobile Menu Panel */}
       <AnimatePresence>
         {open && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              key="backdrop"
-              className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm lg:hidden"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setOpen(false)}
-            />
-
-            {/* Slide-down panel */}
-            <motion.div
-              key="panel"
-              ref={menuRef}
-              className="fixed top-16 left-0 right-0 z-50 lg:hidden bg-white border-b border-slate-100 shadow-xl"
-              initial={{ opacity: 0, y: -12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <div className="max-w-7xl mx-auto px-4 py-4 space-y-1">
-
-                {/* Nav links */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -20 }}
+            className="fixed inset-x-0 top-[90px] z-[49] mx-5 lg:hidden"
+          >
+            <div className="bg-white/90 backdrop-blur-2xl rounded-[32px] p-6 shadow-2xl border border-slate-100">
+              <div className="flex flex-col gap-3">
                 {navLinks.map(({ key, label, to, icon }) => (
                   <Link
                     key={key}
                     to={to}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
-                      isActive(to)
-                        ? 'bg-blue-50 text-blue-600'
-                        : 'text-slate-700 hover:bg-slate-50'
+                    className={`flex items-center gap-4 px-5 py-4 rounded-2xl text-lg font-black transition-colors ${
+                      isActive(to) ? 'bg-blue-600 text-white' : 'text-slate-800 bg-slate-50'
                     }`}
                   >
-                    <span className="text-base">{icon}</span>
-                    {label}
+                    <span className="text-xl">{icon}</span> {label}
                   </Link>
                 ))}
-
-                {/* Divider */}
-                <div className="h-px bg-slate-100 my-2" />
-
-                {/* Subscribe CTA */}
+                <div className="h-px bg-slate-200 my-2" />
                 <button
-                  onClick={() => navigate(subscriptionPath())}
-                  className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all duration-200"
-                  style={{ background: 'linear-gradient(135deg,#2563eb,#0ea5e9)' }}
+                  onClick={() => navigate('/register')}
+                  className="w-full py-5 rounded-2xl text-white font-black text-lg bg-slate-900 shadow-xl"
                 >
-                  {isAuthenticated()
-                    ? user?.userType === 'business' ? 'Get a Quote' : 'Subscribe Now'
-                    : 'Subscribe Now'}
+                  Sign up
                 </button>
-
-                {isAuthenticated() ? (
-                  <>
-                    {/* User info */}
-                    <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl mt-1">
-                      <Avatar size={36} icon={<UserOutlined />} className="bg-blue-600 flex-shrink-0" />
-                      <div className="min-w-0">
-                        <div className="text-sm font-semibold text-slate-800 truncate">{user?.name}</div>
-                        <div className="text-xs text-slate-500 truncate">{user?.email}</div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => navigate(dashboardPath())}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all duration-200"
-                    >
-                      <DashboardOutlined /> Dashboard
-                    </button>
-                    <button
-                      onClick={logout}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all duration-200"
-                    >
-                      <LogoutOutlined /> Log out
-                    </button>
-                  </>
-                ) : (
-                  <div className="flex gap-2 mt-1">
-                    <button
-                      onClick={() => navigate('/login')}
-                      className="flex-1 py-3 rounded-xl text-sm font-medium text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all duration-200"
-                    >
-                      Log in
-                    </button>
-                    <button
-                      onClick={() => navigate('/register')}
-                      className="flex-1 py-3 rounded-xl text-sm font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-all duration-200"
-                    >
-                      Sign up
-                    </button>
-                  </div>
-                )}
               </div>
-            </motion.div>
-          </>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Spacer so content doesn't hide under fixed navbar */}
-      <div style={{ height: 64 }} />
+      <div className="h-28" /> {/* Fixed Spacer to prevent content overlap */}
     </>
   );
 };
