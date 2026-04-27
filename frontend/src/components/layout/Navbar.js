@@ -198,7 +198,7 @@ const Navbar = () => {
         )}
       </AnimatePresence>
 
-      <div className="h-28" /> {/* Fixed Spacer to prevent content overlap */}
+      <div className="h-10" /> {/* Fixed Spacer to prevent content overlap */}
     </>
   );
 };

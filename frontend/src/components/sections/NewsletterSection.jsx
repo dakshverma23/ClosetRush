@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { message } from "antd";
-import { MailOutlined, TwitterOutlined, LinkedinOutlined, GithubOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
+import { MailOutlined, ArrowRightOutlined } from "@ant-design/icons";
 
 export default function NewsletterSection() {
   const [email, setEmail] = useState("");
@@ -22,210 +21,73 @@ export default function NewsletterSection() {
 
   const handleSubscribe = () => {
     if (!email) { message.warning("Please enter your email"); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { message.error("Please enter a valid email"); return; }
     setLoading(true);
-    setTimeout(() => { message.success("Successfully subscribed!"); setEmail(""); setLoading(false); }, 1000);
+    setTimeout(() => { message.success("Joined!"); setEmail(""); setLoading(false); }, 1000);
   };
 
   return (
-    <section className="relative overflow-hidden" style={{ background: "linear-gradient(to bottom, #ffffff, #f0f6ff)" }}>
+    <section className="py-16 px-6 bg-white">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+        className="max-w-4xl mx-auto rounded-[32px] p-8 md:p-12 relative overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.08)] border border-slate-50"
+        style={{ background: "linear-gradient(145deg, #0f172a 0%, #1e293b 100%)" }}
+      >
+        {/* Subtle Background Glows to keep it "airy" */}
+        <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/10 blur-[80px] rounded-full" />
+        
+        <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
+          
+          {/* Compact Logo Visual */}
+          <div className="flex-shrink-0">
+            {newsletterLogo ? (
+              <img src={newsletterLogo} alt="Logo" className="w-20 h-20 md:w-24 md:h-24 object-contain drop-shadow-xl" />
+            ) : (
+              <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-blue-400 text-2xl font-black">
+                {brandName.slice(0, 2)}
+              </div>
+            )}
+          </div>
 
-      {/* ── Newsletter band ── */}
-      <div className="relative z-10 py-8 md:py-16 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
+          <div className="flex-1 text-center md:text-left">
+            <h2 className="text-3xl md:text-4xl font-black text-white mb-3 tracking-tight">
+              Stay Fresh, <span className="text-blue-400">Informed.</span>
+            </h2>
+            <p className="text-slate-400 text-base mb-8 max-w-sm mx-auto md:mx-0">
+              Join the {brandName} circle for sleep science and exclusive hygiene tips.
+            </p>
 
-            {/* Logo / illustration */}
-            <motion.div
-              className="flex justify-center lg:justify-start mb-6 lg:mb-0"
-              initial={{ opacity: 0, x: -40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              viewport={{ once: true }}
-            >
-              {newsletterLogo ? (
-                <img src={newsletterLogo} alt="Newsletter" className="w-40 md:w-56 h-40 md:h-56 object-contain drop-shadow-xl" />
-              ) : (
-                /* Brand card placeholder */
-                <div className="w-40 md:w-56 h-40 md:h-56 rounded-3xl flex flex-col items-center justify-center gap-3 shadow-xl"
-                  style={{ background: "#ffffff", border: "1px solid rgba(168,196,240,0.4)" }}
-                >
-                  <div className="w-12 md:w-16 h-12 md:h-16 rounded-2xl flex items-center justify-center text-xl md:text-2xl font-bold text-white"
-                    style={{ background: "linear-gradient(145deg,#1a3a8a,#3a7bd5)" }}
-                  >
-                    {brandName.slice(0, 2).toUpperCase()}
-                  </div>
-                  <span className="text-base md:text-lg font-bold" style={{ color: "#0f2a52" }}>{brandName}</span>
-                  <span className="text-xs text-center px-4" style={{ color: "#6a8aaa" }}>
-                    Fresh bedding subscription service
-                  </span>
-                </div>
-              )}
-            </motion.div>
-
-            {/* Form */}
-            <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              viewport={{ once: true }}
-            >
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2 md:mb-3" style={{ color: "#0f2a52" }}>
-                Stay Fresh, Stay Informed!
-              </h2>
-              <p className="text-base md:text-lg mb-4 md:mb-6" style={{ color: "#4a6a8a" }}>
-                Let's subscribe with us and find the fun.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="flex-1 flex items-center gap-2 px-4 rounded-xl h-12 border-2"
-                  style={{ background: "#fff", borderColor: "rgba(168,196,240,0.6)" }}
-                >
-                  <MailOutlined style={{ color: "#3a7bd5", fontSize: 16 }} />
+            {/* Slimmed Modern Input */}
+            <div className="relative group max-w-md mx-auto md:mx-0">
+              <div className="flex items-center gap-2 p-1 rounded-full bg-white/5 border border-white/10 transition-all duration-300 focus-within:border-blue-500/50 focus-within:bg-white/10">
+                <div className="flex items-center gap-3 px-4 flex-1">
+                  <MailOutlined className="text-slate-500" />
                   <input
                     type="email"
-                    placeholder="Drop Your Email"
+                    placeholder="Enter email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && handleSubscribe()}
-                    className="flex-1 bg-transparent outline-none text-sm"
-                    style={{ color: "#0f2a52" }}
+                    className="bg-transparent border-none outline-none w-full py-3 text-white placeholder:text-slate-600 text-sm font-medium"
                   />
                 </div>
                 <button
                   onClick={handleSubscribe}
                   disabled={loading}
-                  className="h-12 px-7 rounded-xl font-semibold text-sm text-white transition-all duration-200 hover:scale-105 hover:shadow-lg flex-shrink-0"
-                  style={{ background: "linear-gradient(135deg,#1a3a8a,#3a7bd5)" }}
+                  className="px-6 py-3 rounded-full bg-blue-600 text-white font-black text-xs uppercase tracking-widest transition-all hover:bg-blue-500 active:scale-95 flex items-center gap-2"
                 >
-                  {loading ? "..." : "Subscribe"}
+                  {loading ? "..." : "Join"} <ArrowRightOutlined />
                 </button>
               </div>
-
-              <p className="text-sm mt-3 flex items-center gap-1.5" style={{ color: "#6a8aaa" }}>
-                <span>🔒</span> We respect your privacy. Unsubscribe at any time.
-              </p>
-            </motion.div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Wave divider ── */}
-      <div className="relative" style={{ marginBottom: -2 }}>
-        <svg viewBox="0 0 1440 80" className="w-full block" preserveAspectRatio="none" style={{ height: 60 }}>
-          <path
-            fill="#0f2a52"
-            d="M0,40 C240,80 480,0 720,40 C960,80 1200,0 1440,40 L1440,80 L0,80 Z"
-          />
-        </svg>
-      </div>
-
-      {/* ── Footer ── */}
-      <div className="relative text-white pt-12 pb-8 hidden md:block"
-        style={{ background: "linear-gradient(160deg,#0f2a52 0%,#1a3a8a 50%,#0d2448 100%)" }}
-      >
-        {/* Dot grid */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.04]"
-          style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "32px 32px" }}
-        />
-
-        <div className="relative z-10 max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-
-            {/* Brand - Hidden on desktop */}
-            <div className="md:col-span-1 hidden">
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm"
-                  style={{ background: "rgba(168,196,240,0.2)", border: "1px solid rgba(168,196,240,0.3)", color: "#a8c4f0" }}
-                >
-                  {brandName.slice(0, 2).toUpperCase()}
-                </div>
-                <span className="text-lg font-bold text-white">{brandName}</span>
-              </div>
-              <p className="text-sm mb-5 leading-relaxed" style={{ color: "rgba(252, 252, 252, 1)" }}>
-                {brandName} is a fresh bedding subscription service who care about your sleep comfort.
-              </p>
-              <div className="flex gap-2.5">
-                {[TwitterOutlined, LinkedinOutlined, GithubOutlined].map((Icon, i) => (
-                  <a key={i} href="#"
-                    className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
-                    style={{ background: "rgba(168,196,240,0.12)", border: "1px solid rgba(168,196,240,0.2)" }}
-                  >
-                    <Icon style={{ color: "#ffffffff", fontSize: 14 }} />
-                  </a>
-                ))}
-              </div>
             </div>
 
-            {/* Services */}
-            <div>
-              <h3 className="text-sm font-bold mb-4 tracking-wide uppercase" style={{ color: "#ffffffff" }}>Services</h3>
-              <ul className="space-y-2.5">
-                {[
-                  ["Individual Subscription", "/subscriptions"],
-                  ["Business Subscription", "/business/subscriptions"],
-                  ["What We Offer", "/what-we-offer"],
-                  ["Pricing Plans", "/pricing"],
-                  ["Get a Quote", "/get-quote"],
-                ].map(([label, to]) => (
-                  <li key={to}>
-                    <Link to={to} className="text-sm transition-colors duration-200 hover:text-white"
-                      style={{ color: "rgba(255, 255, 255, 1)" }}
-                    >{label}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div>
-              <h3 className="text-sm font-bold mb-4 tracking-wide uppercase" style={{ color: "#ffffffff" }}>Company</h3>
-              <ul className="space-y-2.5">
-                {[
-                  ["Science Behind", "/science-behind"],
-                  ["Our Story", "/about"],
-                  ["Our Philosophy", "/philosophy"],
-                  ["Leadership & Team", "/team"],
-                  ["Careers", "/careers"],
-                ].map(([label, to]) => (
-                  <li key={to}>
-                    <Link to={to} className="text-sm transition-colors duration-200 hover:text-white"
-                      style={{ color: "rgba(255, 255, 255, 1)" }}
-                    >{label}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Contact */}
-            <div>
-              <h3 className="text-sm font-bold mb-4 tracking-wide uppercase" style={{ color: "#ffffffff" }}>Contact Us</h3>
-              <ul className="space-y-2.5">
-                {[
-                  ["Business Inquiry", "/contact"],
-                  ["Customer Support", "/support"],
-                  ["Join The Team", "/join"],
-                  ["Privacy Policy", "/privacy"],
-                  ["Terms Of Service", "/terms"],
-                ].map(([label, to]) => (
-                  <li key={to}>
-                    <Link to={to} className="text-sm transition-colors duration-200 hover:text-white"
-                      style={{ color: "rgba(255, 255, 255, 1)" }}
-                    >{label}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Bottom bar */}
-          <div className="border-t pt-6 text-center" style={{ borderColor: "rgba(168,196,240,0.15)" }}>
-            <p className="text-sm" style={{ color: "rgba(255, 255, 255, 1)" }}>
-              © 2024 All Rights Reserved · {brandName} — Fresh Bedding Subscription Service
+            <p className="text-[10px] text-slate-500 mt-4 uppercase tracking-[0.2em] font-bold">
+              🔒 Private • Weekly • No Spam
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

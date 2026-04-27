@@ -7,8 +7,6 @@ import api from '../../services/api';
 
 const { Content } = Layout;
 
-// ── 🖼️ IMAGE & CONTENT CONFIGURATION ────────────────────────────────────────
-// CHANGE THESE URLS TO UPDATE THE IMAGES INSTANTLY
 const IMAGE_CONFIG = {
   heroBg: "https://images.unsplash.com/photo-1532187863486-abf9d39d99c5?q=80&w=2070",
   health: [
@@ -29,7 +27,6 @@ const IMAGE_CONFIG = {
   ]
 };
 
-// ── ANIMATION SETTINGS ──────────────────────────────────────────────────────
 const TRANSITION = { duration: 1.2, ease: [0.16, 1, 0.3, 1] };
 
 const ScienceHero = () => {
@@ -66,21 +63,20 @@ const ScienceSection = ({ section, index }) => {
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const yImage = useTransform(scrollYProgress, [0, 1], [-60, 60]);
 
-  // Determine which image array to use based on section key/title
   const getImages = () => {
     if (section.title.toLowerCase().includes('health')) return IMAGE_CONFIG.health;
     if (section.title.toLowerCase().includes('hygiene')) return IMAGE_CONFIG.hygiene;
     if (section.title.toLowerCase().includes('energy')) return IMAGE_CONFIG.energy;
     if (section.title.toLowerCase().includes('mental')) return IMAGE_CONFIG.mental;
-    return IMAGE_CONFIG.health; // Default
+    return IMAGE_CONFIG.health;
   };
 
   const images = section.images?.length > 0 ? section.images.map(img => img.url) : getImages();
 
   return (
-    <section ref={ref} className={`py-32 md:py-56 relative overflow-hidden ${section.dark ? 'bg-[#050b14] text-white' : 'bg-white text-[#050b14]'}`}>
+    <section ref={ref} className={`py-20 md:py-32 relative overflow-hidden ${section.dark ? 'bg-[#050b14] text-white' : 'bg-white text-[#050b14]'}`}>
       <div className="max-w-[1400px] mx-auto px-8">
-        <Row gutter={[100, 80]} align="middle" className={isEven ? '' : 'flex-row-reverse'}>
+        <Row gutter={[100, 40]} align="middle" className={isEven ? '' : 'flex-row-reverse'}>
           
           <Col xs={24} lg={12}>
             <motion.div initial={{ opacity: 0, x: isEven ? -60 : 60 }} animate={isInView ? { opacity: 1, x: 0 } : {}} transition={TRANSITION}>
@@ -119,7 +115,7 @@ const ScienceSection = ({ section, index }) => {
           </Col>
 
           <Col xs={24} lg={12}>
-            <div className="relative pt-12"> {/* Added padding top to prevent overlap */}
+            <div className="relative pt-0"> 
               <motion.div 
                 style={{ y: yImage }}
                 className="aspect-[4/5] rounded-[60px] overflow-hidden shadow-2xl relative z-10"
@@ -127,17 +123,15 @@ const ScienceSection = ({ section, index }) => {
                 <img src={images[0]} className="w-full h-full object-cover transition-transform duration-1000 hover:scale-110" alt="Main" />
               </motion.div>
               
-              {/* FIXED DETAIL IMAGE CONTAINER */}
               <motion.div 
                 initial={{ opacity: 0, scale: 0.8, y: 50 }}
                 animate={isInView ? { opacity: 1, scale: 1, y: 0 } : {}}
                 transition={{ delay: 0.5, ...TRANSITION }}
-                className={`absolute -bottom-12 ${isEven ? '-right-8' : '-left-8'} z-30 p-1 w-64 h-64 rounded-[40px] shadow-2xl hidden md:block overflow-hidden
+                className={`absolute -bottom-6 ${isEven ? '-right-8' : '-left-8'} z-30 p-1 w-64 h-64 rounded-[40px] shadow-2xl hidden md:block overflow-hidden
                   ${section.dark ? 'bg-[#050b14]' : 'bg-white'}`}
               >
                  <div className="relative w-full h-full rounded-[38px] overflow-hidden">
                     <img src={images[1]} className="w-full h-full object-cover" alt="Detail View" />
-                    {/* Detail Label Overlay */}
                     <div className="absolute top-4 left-4 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
                         <span className="text-white text-[9px] font-black uppercase tracking-widest">Detail View</span>
                     </div>
@@ -163,7 +157,6 @@ const ScienceBehindPage = () => {
   ];
 
   useEffect(() => {
-    // Use default categories data
     const formatted = CATEGORIES.map((cat, i) => {
       return {
         title: cat.title,
@@ -197,7 +190,7 @@ const ScienceBehindPage = () => {
               <ScienceSection key={index} section={section} index={index} />
             ))}
           </AnimatePresence>
-          <section className="py-60 px-8 bg-white text-center relative overflow-hidden">
+          <section className="py-32 px-8 bg-white text-center relative overflow-hidden">
             <h2 className="text-7xl md:text-[10vw] font-black tracking-tighter leading-none mb-16 text-[#050b14]">
                 Start <br /> <span className="text-blue-600 italic">Today.</span>
             </h2>
