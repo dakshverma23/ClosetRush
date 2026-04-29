@@ -21,8 +21,8 @@ class ApiError extends Error {
     return new ApiError(message, 401, code);
   }
 
-  static forbidden(message = 'Access denied') {
-    return new ApiError(message, 403, 'FORBIDDEN');
+  static forbidden(message = 'Access denied', code = 'FORBIDDEN') {
+    return new ApiError(message, 403, code);
   }
 
   static notFound(message = 'Resource not found', code = 'NOT_FOUND') {

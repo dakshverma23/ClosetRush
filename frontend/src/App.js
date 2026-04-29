@@ -2,12 +2,19 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ConfigProvider, App as AntdApp } from 'antd';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { MessageBridge } from './utils/message';
 
 // Public pages
 import HomePage from './pages/public/HomePage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import OAuthCallback from './pages/auth/OAuthCallback';
+import PickupLoginPage from './pages/auth/PickupLoginPage';
+import PickupRegisterPage from './pages/auth/PickupRegisterPage';
+import WarehouseLoginPage from './pages/auth/WarehouseLoginPage';
+import WarehouseRegisterPage from './pages/auth/WarehouseRegisterPage';
+import LogisticsLoginPage from './pages/auth/LogisticsLoginPage';
+import LogisticsRegisterPage from './pages/auth/LogisticsRegisterPage';
 import ScienceBehind from './pages/public/ScienceBehind';
 import WhatWeOffer from './pages/public/WhatWeOfferNew';
 import AboutPage from './pages/public/AboutPage';
@@ -30,6 +37,9 @@ import {
 import IndividualDashboard from './pages/dashboards/IndividualDashboard';
 import BusinessDashboard from './pages/dashboards/BusinessDashboard';
 import AdminDashboard from './pages/dashboards/AdminDashboard';
+import PickupMemberDashboard from './pages/dashboards/PickupMemberDashboard';
+import WarehouseDashboard from './pages/dashboards/WarehouseDashboard';
+import LogisticsDashboard from './pages/dashboards/LogisticsDashboard';
 import MyQuotesPage from './pages/dashboards/MyQuotesPage';
 
 // Import admin pages
@@ -41,6 +51,11 @@ import AdminAnalyticsPage from './pages/admin/AdminAnalyticsPage';
 import BrandSettingsPage from './pages/admin/BrandSettingsPage';
 import InventoryManagementPage from './pages/admin/InventoryManagementPage';
 import BundlesManagementPage from './pages/admin/BundlesManagementPage';
+import PickupMemberApprovals from './pages/admin/PickupMemberApprovals';
+import StaffApprovalsPage from './pages/admin/StaffApprovalsPage';
+
+// Import pickup member pages
+import SubmitPickupReport from './pages/pickup/SubmitPickupReport';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
@@ -67,6 +82,12 @@ const PublicRoute = ({ children }) => {
       return <Navigate to="/admin/dashboard" replace />;
     } else if (user?.userType === 'business') {
       return <Navigate to="/business/dashboard" replace />;
+    } else if (user?.userType === 'pickup_member') {
+      return <Navigate to="/warehouse/dashboard" replace />;
+    } else if (user?.userType === 'warehouse_manager') {
+      return <Navigate to="/warehouse/dashboard" replace />;
+    } else if (user?.userType === 'logistics_partner') {
+      return <Navigate to="/logistics/dashboard" replace />;
     } else {
       return <Navigate to="/dashboard" replace />;
     }
@@ -89,6 +110,22 @@ function AppRoutes() {
       <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
       <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
       <Route path="/auth/callback" element={<OAuthCallback />} />
+
+      {/* Pickup Member Auth Routes */}
+      <Route path="/pickup/login" element={<PickupLoginPage />} />
+      <Route path="/pickup/register" element={<PickupRegisterPage />} />
+
+      {/* Warehouse Manager Auth Routes */}
+      <Route path="/warehouse/login" element={<WarehouseLoginPage />} />
+      <Route path="/warehouse/register" element={<WarehouseRegisterPage />} />
+
+      {/* Logistics Partner Auth Routes */}
+      <Route path="/logistics/login" element={<LogisticsLoginPage />} />
+      <Route path="/logistics/register" element={<LogisticsRegisterPage />} />
+
+      {/* Backward-compat redirects */}
+      <Route path="/pickup/login" element={<Navigate to="/warehouse/login" replace />} />
+      <Route path="/pickup/register" element={<Navigate to="/warehouse/register" replace />} />
 
       {/* Individual User Routes */}
       <Route 
@@ -168,6 +205,10 @@ function AppRoutes() {
         } 
       />
       <Route 
+        path="/admin/pickup-members" 
+        element={<Navigate to="/admin/staff-approvals" replace />}
+      />
+      <Route 
         path="/admin/analytics" 
         element={
           <ProtectedRoute allowedRoles={['admin']}>
@@ -228,6 +269,48 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={['admin']}>
             <BundlesManagementPage />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Pickup Member Routes — redirect to warehouse */}
+      <Route path="/pickup/dashboard" element={<Navigate to="/warehouse/dashboard" replace />} />
+      <Route path="/pickup/submit-report" element={<Navigate to="/warehouse/submit-report" replace />} />
+
+      {/* Warehouse Manager Routes */}
+      <Route 
+        path="/warehouse/dashboard" 
+        element={
+          <ProtectedRoute allowedRoles={['warehouse_manager']}>
+            <WarehouseDashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/warehouse/submit-report" 
+        element={
+          <ProtectedRoute allowedRoles={['warehouse_manager']}>
+            <SubmitPickupReport />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Logistics Partner Routes */}
+      <Route 
+        path="/logistics/dashboard" 
+        element={
+          <ProtectedRoute allowedRoles={['logistics_partner']}>
+            <LogisticsDashboard />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Admin Staff Approvals */}
+      <Route 
+        path="/admin/staff-approvals" 
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <PickupMemberApprovals />
           </ProtectedRoute>
         } 
       />
@@ -331,6 +414,7 @@ function App() {
       <AuthProvider>
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <AntdApp>
+            <MessageBridge />
             <AppRoutes />
           </AntdApp>
         </Router>

@@ -9,8 +9,15 @@ const requestLogger = require('./middleware/requestLogger');
 
 const app = express();
 
-// Connect to MongoDB
-connectDB();
+// Import subscription expiry job
+const subscriptionExpiryJob = require('./services/subscriptionExpiryJob');
+
+// Connect to MongoDB and start cron jobs
+connectDB().then(() => {
+  subscriptionExpiryJob.start();
+}).catch((err) => {
+  console.error('Failed to initialize application:', err);
+});
 
 // Security middleware
 app.use(helmet());
@@ -55,6 +62,15 @@ app.use('/api/quotes', require('./routes/quotes'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/inventory-management', require('./routes/inventoryManagement'));
+app.use('/api/pickup-members', require('./routes/warehouseManagerRoutes'));  // backward-compat alias
+app.use('/api/warehouse-managers', require('./routes/warehouseManagerRoutes'));
+app.use('/api/logistics-partners', require('./routes/logisticsPartnerRoutes'));
+// Backward-compat alias: proxy /api/pickup-members to /api/warehouse-managers
+app.use('/api/pickup-members', require('./routes/warehouseManagerRoutes'));
+app.use('/api/logistics-partners', require('./routes/logisticsPartnerRoutes'));
+app.use('/api/orders', require('./routes/orderRoutes'));
+app.use('/api/quality-checks', require('./routes/qualityCheckRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
 
 // 404 handler
 app.use((req, res) => {

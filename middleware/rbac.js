@@ -41,7 +41,7 @@ const requireBusinessOrAdmin = requireRole('business', 'admin');
 /**
  * Any authenticated user middleware
  */
-const requireAuth = requireRole('individual', 'business', 'admin');
+const requireAuth = requireRole('individual', 'business', 'admin', 'warehouse_manager', 'logistics_partner');
 
 /**
  * Check if user owns the resource
@@ -99,11 +99,79 @@ const requirePropertyOwnership = async (req, res, next) => {
   }
 };
 
+/**
+ * Warehouse Manager middleware (approved only) — formerly requirePickupMember
+ */
+const requireWarehouseManager = (req, res, next) => {
+  try {
+    if (!req.user) {
+      throw ApiError.unauthorized('Authentication required');
+    }
+
+    if (req.user.userType !== 'warehouse_manager') {
+      throw ApiError.forbidden('Warehouse manager access required');
+    }
+
+    if (req.user.warehouseManagerStatus === 'rejected') {
+      throw ApiError.forbidden(
+        'Your warehouse manager account has been rejected',
+        'ACCOUNT_REJECTED'
+      );
+    }
+
+    if (req.user.warehouseManagerStatus !== 'approved') {
+      throw ApiError.forbidden(
+        'Your warehouse manager account is pending admin approval',
+        'PENDING_APPROVAL'
+      );
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Logistics Partner middleware (approved only)
+ */
+const requireLogisticsPartner = (req, res, next) => {
+  try {
+    if (!req.user) {
+      throw ApiError.unauthorized('Authentication required');
+    }
+
+    if (req.user.userType !== 'logistics_partner') {
+      throw ApiError.forbidden('Logistics partner access required');
+    }
+
+    if (req.user.logisticsPartnerStatus === 'rejected') {
+      throw ApiError.forbidden(
+        'Your logistics partner account has been rejected',
+        'ACCOUNT_REJECTED'
+      );
+    }
+
+    if (req.user.logisticsPartnerStatus !== 'approved') {
+      throw ApiError.forbidden(
+        'Your logistics partner account is pending admin approval',
+        'PENDING_APPROVAL'
+      );
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   requireRole,
   requireAdmin,
   requireBusinessOrAdmin,
   requireAuth,
   requireOwnership,
-  requirePropertyOwnership
+  requirePropertyOwnership,
+  requireWarehouseManager,
+  requireLogisticsPartner
 };

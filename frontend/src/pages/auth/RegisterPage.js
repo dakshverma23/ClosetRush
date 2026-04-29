@@ -163,6 +163,40 @@ const RegisterPage = () => {
             </div>
           </div>
 
+          {/* Staff Register Links */}
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-3 bg-transparent text-gray-500 font-medium">Are you a staff member?</span>
+              </div>
+            </div>
+            <div className="mt-4 flex flex-col gap-3">
+              <Link to="/warehouse/register">
+                <Button
+                  block
+                  size="large"
+                  className="h-12 font-semibold rounded-xl border-2 border-blue-400 text-blue-600 hover:bg-blue-50 hover:border-blue-500"
+                  icon={<span className="mr-1">🏭</span>}
+                >
+                  Register as Warehouse Manager
+                </Button>
+              </Link>
+              <Link to="/logistics/register">
+                <Button
+                  block
+                  size="large"
+                  className="h-12 font-semibold rounded-xl border-2 border-green-400 text-green-600 hover:bg-green-50 hover:border-green-500"
+                  icon={<span className="mr-1">🚚</span>}
+                >
+                  Register as Logistics Partner
+                </Button>
+              </Link>
+            </div>
+          </div>
+
           {/* Benefits Section */}
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
             <div className="p-4 bg-gradient-card rounded-modern border border-white/20">

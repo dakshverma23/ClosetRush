@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Card, Row, Col, Statistic, Table, Tag, Button, message, Modal, Form, Input, InputNumber, Select, Spin, Tabs, Drawer, Avatar, Dropdown, Descriptions, Divider, Upload, Image } from 'antd';
+import { Layout, Card, Row, Col, Statistic, Table, Tag, Button, Modal, Form, Input, InputNumber, Select, Spin, Tabs, Drawer, Avatar, Dropdown, Descriptions, Divider, Upload, Image, DatePicker, Space } from 'antd';
+import appMessage from '../../utils/message';
 import {
   UserOutlined,
   ShoppingOutlined,
@@ -20,7 +21,12 @@ import {
   SettingOutlined,
   DatabaseOutlined,
   UploadOutlined,
-  PictureOutlined
+  PictureOutlined,
+  ShopOutlined,
+  TruckOutlined,
+  CheckOutlined,
+  CloseOutlined,
+  FilterOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -28,6 +34,204 @@ import api from '../../services/api';
 
 const { Content, Sider } = Layout;
 const { TextArea } = Input;
+
+// ─── Quality Checks Panel (used inside AdminDashboard orders tabs) ─────────────
+const QualityChecksPanel = () => {
+  const [qcList, setQcList] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [viewModal, setViewModal] = useState({ visible: false, record: null });
+  const [reviewModal, setReviewModal] = useState({ visible: false, record: null });
+  const [adminNotes, setAdminNotes] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/quality-checks');
+      setQcList(res.data.qualityChecks || []);
+    } catch {
+      appMessage.error('Failed to load quality checks');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const handleReview = async () => {
+    setSubmitting(true);
+    try {
+      await api.patch(`/quality-checks/${reviewModal.record._id}/review`, { adminNotes });
+      appMessage.success('Quality check reviewed');
+      setReviewModal({ visible: false, record: null });
+      setAdminNotes('');
+      load();
+    } catch {
+      appMessage.error('Failed to review');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const conditionColors = { excellent: 'green', good: 'blue', fair: 'orange', poor: 'red' };
+
+  const columns = [
+    {
+      title: 'Order ID',
+      key: 'orderId',
+      render: (_, r) => <Tag color="purple" className="font-mono">{r.orderId?._id?.slice(-8) || '—'}</Tag>
+    },
+    {
+      title: 'Customer',
+      key: 'customer',
+      responsive: ['md'],
+      render: (_, r) => (
+        <div>
+          <div className="font-medium">{r.userId?.name || '—'}</div>
+          <div className="text-xs text-slate-400">{r.userId?.email}</div>
+        </div>
+      )
+    },
+    {
+      title: 'Submitted By',
+      key: 'submittedBy',
+      responsive: ['lg'],
+      render: (_, r) => r.submittedBy?.name || '—'
+    },
+    {
+      title: 'Condition',
+      key: 'condition',
+      render: (_, r) => (
+        <Tag color={conditionColors[r.overallCondition] || 'default'}>
+          {r.overallCondition?.toUpperCase()}
+        </Tag>
+      )
+    },
+    {
+      title: 'Photos',
+      key: 'photos',
+      render: (_, r) => <span className="text-slate-500 text-sm">{r.images?.length || 0}</span>
+    },
+    {
+      title: 'Status',
+      key: 'status',
+      render: (_, r) => r.reviewedByAdmin
+        ? <Tag color="green">Reviewed</Tag>
+        : <Tag color="orange">Pending</Tag>
+    },
+    {
+      title: 'Date',
+      key: 'date',
+      responsive: ['md'],
+      render: (_, r) => new Date(r.createdAt).toLocaleDateString()
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      render: (_, r) => (
+        <Space wrap>
+          <Button size="small" icon={<EyeOutlined />} onClick={() => setViewModal({ visible: true, record: r })}>
+            View
+          </Button>
+          {!r.reviewedByAdmin && (
+            <Button
+              size="small"
+              type="primary"
+              onClick={() => { setAdminNotes(''); setReviewModal({ visible: true, record: r }); }}
+              style={{ background: '#7c3aed', borderColor: '#7c3aed' }}
+            >
+              Review
+            </Button>
+          )}
+        </Space>
+      )
+    }
+  ];
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-slate-800">Quality Check Reports</h3>
+        <Button onClick={load} loading={loading}>Refresh</Button>
+      </div>
+      <Table
+        dataSource={qcList}
+        columns={columns}
+        rowKey="_id"
+        loading={loading}
+        pagination={{ pageSize: 10, responsive: true }}
+        scroll={{ x: 700 }}
+        locale={{ emptyText: 'No quality checks submitted yet' }}
+        rowClassName={r => !r.reviewedByAdmin ? 'bg-purple-50' : ''}
+      />
+
+      {/* View Modal */}
+      <Modal
+        title="Quality Check Details"
+        open={viewModal.visible}
+        onCancel={() => setViewModal({ visible: false, record: null })}
+        footer={<Button onClick={() => setViewModal({ visible: false, record: null })}>Close</Button>}
+        width={680}
+      >
+        {viewModal.record && (
+          <>
+            <Descriptions bordered column={1} size="small" className="mb-4">
+              <Descriptions.Item label="Customer">
+                {viewModal.record.userId?.name} ({viewModal.record.userId?.email})
+              </Descriptions.Item>
+              <Descriptions.Item label="Order ID">
+                <Tag color="purple" className="font-mono">{viewModal.record.orderId?._id?.slice(-8)}</Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="Bundle">{viewModal.record.bundleSummary || '—'}</Descriptions.Item>
+              <Descriptions.Item label="Bag IDs">{viewModal.record.bagIds?.join(', ') || '—'}</Descriptions.Item>
+              <Descriptions.Item label="SKU Codes">{viewModal.record.skuCodes?.join(', ') || '—'}</Descriptions.Item>
+              <Descriptions.Item label="Condition">
+                <Tag color={conditionColors[viewModal.record.overallCondition]}>{viewModal.record.overallCondition?.toUpperCase()}</Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="Notes">{viewModal.record.notes || '—'}</Descriptions.Item>
+              <Descriptions.Item label="Submitted By">{viewModal.record.submittedBy?.name}</Descriptions.Item>
+              <Descriptions.Item label="Submitted At">{new Date(viewModal.record.createdAt).toLocaleString()}</Descriptions.Item>
+              {viewModal.record.adminNotes && (
+                <Descriptions.Item label="Admin Notes">{viewModal.record.adminNotes}</Descriptions.Item>
+              )}
+            </Descriptions>
+            {viewModal.record.images?.length > 0 && (
+              <div>
+                <div className="font-medium text-slate-700 mb-2">Photos ({viewModal.record.images.length})</div>
+                <Image.PreviewGroup>
+                  <div className="flex flex-wrap gap-2">
+                    {viewModal.record.images.map((url, i) => (
+                      <Image key={i} src={url} width={90} height={90} style={{ objectFit: 'cover', borderRadius: 8 }} />
+                    ))}
+                  </div>
+                </Image.PreviewGroup>
+              </div>
+            )}
+          </>
+        )}
+      </Modal>
+
+      {/* Review Modal */}
+      <Modal
+        title="Review Quality Check"
+        open={reviewModal.visible}
+        onCancel={() => setReviewModal({ visible: false, record: null })}
+        onOk={handleReview}
+        okText="Mark as Reviewed"
+        confirmLoading={submitting}
+        okButtonProps={{ style: { background: '#7c3aed', borderColor: '#7c3aed' } }}
+      >
+        <p className="mb-3 text-slate-600">Add any admin notes for this quality check (optional):</p>
+        <Input.TextArea
+          rows={4}
+          placeholder="Admin notes..."
+          value={adminNotes}
+          onChange={e => setAdminNotes(e.target.value)}
+        />
+      </Modal>
+    </div>
+  );
+};
 
 const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -50,14 +254,51 @@ const AdminDashboard = () => {
   const [bundleItems, setBundleItems] = useState([]);
   const [bundleImage, setBundleImage] = useState(null);
   const [bundleImagePreview, setBundleImagePreview] = useState('');
+  const [pendingPickupMembers, setPendingPickupMembers] = useState(0);
+  const [pendingLogisticsPartners, setPendingLogisticsPartners] = useState(0);
   const [form] = Form.useForm();
   const [userForm] = Form.useForm();
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [pickupMembers, setPickupMembers] = useState([]);
+  const [assignModal, setAssignModal] = useState({ visible: false, order: null });
+  const [assigningPickupMemberId, setAssigningPickupMemberId] = useState(null);
+  const [rejectModal, setRejectModal] = useState({ visible: false, order: null });
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [previewImages, setPreviewImages] = useState([]);
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+
+  // ── All Orders filter state ───────────────────────────────────────────────
+  const [orderFilterStatus, setOrderFilterStatus] = useState('all');
+  const [orderFilterBundle, setOrderFilterBundle] = useState('all');
+  const [orderFilterDateRange, setOrderFilterDateRange] = useState([null, null]);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
+  const shortId = (id) => (id ? String(id).slice(-8) : '—');
+
   useEffect(() => {
     fetchDashboardData();
+    fetchPendingPickupMembers();
+    fetchOrders();
   }, []);
+
+  const fetchPendingPickupMembers = async () => {
+    try {
+      const [whRes, lpRes] = await Promise.all([
+        api.get('/warehouse-managers?status=pending'),
+        api.get('/logistics-partners?status=pending')
+      ]);
+      const whData = Array.isArray(whRes.data.members) ? whRes.data.members : [];
+      const lpData = Array.isArray(lpRes.data.members) ? lpRes.data.members : [];
+      setPendingPickupMembers(whData.length);
+      setPendingLogisticsPartners(lpData.length);
+    } catch (error) {
+      console.error('Failed to load pending staff counts');
+    }
+  };
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -91,7 +332,7 @@ const AdminDashboard = () => {
       setTickets(ticketsResponse.data.tickets || []);
 
     } catch (error) {
-      message.error('Failed to load dashboard data');
+      appMessage.error('Failed to load dashboard data');
       console.error(error);
     } finally {
       setLoading(false);
@@ -123,7 +364,7 @@ const AdminDashboard = () => {
       // Old structure: items is an object with singleBedsheets, doubleBedsheets, etc.
       // Convert to empty array for now, or you can map old items to categories if you have the mapping
       items = [{ category: '', quantity: 1 }];
-      message.warning('This bundle uses the old format. Please update the items.');
+      appMessage.warning('This bundle uses the old format. Please update the items.');
     } else {
       // No items
       items = [{ category: '', quantity: 1 }];
@@ -171,17 +412,17 @@ const AdminDashboard = () => {
     try {
       // Validate bundle items
       if (bundleItems.length === 0) {
-        message.error('Please add at least one item to the bundle');
+        appMessage.error('Please add at least one item to the bundle');
         return;
       }
 
       for (const item of bundleItems) {
         if (!item.category) {
-          message.error('Please select a category for all items');
+          appMessage.error('Please select a category for all items');
           return;
         }
         if (!item.quantity || item.quantity < 1) {
-          message.error('Please enter valid quantities for all items');
+          appMessage.error('Please enter valid quantities for all items');
           return;
         }
       }
@@ -203,12 +444,12 @@ const AdminDashboard = () => {
         await api.put(`/bundles/${editingBundle._id}`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        message.success('Bundle updated successfully');
+        appMessage.success('Bundle updated successfully');
       } else {
         await api.post('/bundles', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        message.success('Bundle created successfully');
+        appMessage.success('Bundle created successfully');
       }
 
       setIsBundleModalVisible(false);
@@ -218,7 +459,7 @@ const AdminDashboard = () => {
       setBundleImagePreview('');
       fetchDashboardData();
     } catch (error) {
-      message.error(error.response?.data?.message || 'Failed to save bundle');
+      appMessage.error(error.response?.data?.message || 'Failed to save bundle');
     }
   };
 
@@ -231,10 +472,10 @@ const AdminDashboard = () => {
       onOk: async () => {
         try {
           await api.delete(`/bundles/${id}`);
-          message.success('Bundle deleted successfully');
+          appMessage.success('Bundle deleted successfully');
           fetchDashboardData();
         } catch (error) {
-          message.error(error.error?.message || 'Failed to delete bundle');
+          appMessage.error(error.error?.message || 'Failed to delete bundle');
         }
       }
     });
@@ -243,20 +484,20 @@ const AdminDashboard = () => {
   const handleToggleBundleStatus = async (id) => {
     try {
       await api.patch(`/bundles/${id}/toggle-status`);
-      message.success('Bundle status updated');
+      appMessage.success('Bundle status updated');
       fetchDashboardData();
     } catch (error) {
-      message.error(error.error?.message || 'Failed to update status');
+      appMessage.error(error.error?.message || 'Failed to update status');
     }
   };
 
   const handleUpdateQuoteStatus = async (id, status) => {
     try {
       await api.patch(`/quotes/${id}/status`, { status });
-      message.success('Quote status updated');
+      appMessage.success('Quote status updated');
       fetchDashboardData();
     } catch (error) {
-      message.error(error.error?.message || 'Failed to update quote status');
+      appMessage.error(error.error?.message || 'Failed to update quote status');
     }
   };
 
@@ -268,10 +509,10 @@ const AdminDashboard = () => {
   const handleUpdateTicketStatus = async (id, status) => {
     try {
       await api.patch(`/support/${id}/status`, { status });
-      message.success('Ticket status updated');
+      appMessage.success('Ticket status updated');
       fetchDashboardData();
     } catch (error) {
-      message.error(error.error?.message || 'Failed to update ticket status');
+      appMessage.error(error.error?.message || 'Failed to update ticket status');
     }
   };
 
@@ -290,22 +531,22 @@ const AdminDashboard = () => {
   const handleSaveUser = async (values) => {
     try {
       await api.put(`/users/${editingUser._id}`, values);
-      message.success('User updated successfully');
+      appMessage.success('User updated successfully');
       setIsUserModalVisible(false);
       userForm.resetFields();
       fetchDashboardData();
     } catch (error) {
-      message.error(error.error?.message || 'Failed to update user');
+      appMessage.error(error.error?.message || 'Failed to update user');
     }
   };
 
   const handleToggleUserStatus = async (id) => {
     try {
       await api.patch(`/users/${id}/toggle-status`);
-      message.success('User status updated');
+      appMessage.success('User status updated');
       fetchDashboardData();
     } catch (error) {
-      message.error(error.error?.message || 'Failed to update user status');
+      appMessage.error(error.error?.message || 'Failed to update user status');
     }
   };
 
@@ -318,13 +559,147 @@ const AdminDashboard = () => {
       onOk: async () => {
         try {
           await api.delete(`/users/${id}`);
-          message.success('User deleted successfully');
+          appMessage.success('User deleted successfully');
           fetchDashboardData();
         } catch (error) {
-          message.error(error.error?.message || 'Failed to delete user');
+          appMessage.error(error.error?.message || 'Failed to delete user');
         }
       }
     });
+  };
+
+  const fetchOrders = async () => {
+    setOrdersLoading(true);
+    try {
+      const response = await api.get('/orders');
+      setOrders(response.data.orders || []);
+    } catch (error) {
+      appMessage.error('Failed to load orders');
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  // Fetch approved warehouse managers for assignment
+  const fetchPickupMembers = async () => {
+    try {
+      const response = await api.get('/warehouse-managers?status=approved');
+      setPickupMembers(response.data.warehouseManagers || response.data.members || []);
+    } catch (error) {
+      console.error('Failed to load warehouse managers');
+    }
+  };
+
+  // Fetch approved logistics partners for logistics assignment
+  const [logisticsPartners, setLogisticsPartners] = useState([]);
+  const [assignLogisticsModal, setAssignLogisticsModal] = useState({ visible: false, order: null });
+  const [assigningLogisticsPartnerId, setAssigningLogisticsPartnerId] = useState(null);
+
+  const fetchLogisticsPartners = async () => {
+    try {
+      const response = await api.get('/logistics-partners?status=approved');
+      setLogisticsPartners(response.data.logisticsPartners || []);
+    } catch (error) {
+      console.error('Failed to load logistics partners');
+    }
+  };
+
+  const handleOpenAssignModal = (order) => {
+    setAssigningPickupMemberId(null);
+    setAssignModal({ visible: true, order });
+    fetchPickupMembers();
+  };
+
+  const handleOpenAssignLogisticsModal = (order) => {
+    setAssigningLogisticsPartnerId(null);
+    setAssignLogisticsModal({ visible: true, order });
+    fetchLogisticsPartners();
+  };
+
+  const handleAssignOrder = async () => {
+    if (!assigningPickupMemberId) {
+      appMessage.warning('Please select a warehouse manager');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await api.post(`/orders/${assignModal.order._id}/assign-warehouse`, {
+        warehouseManagerId: assigningPickupMemberId
+      });
+      appMessage.success('Order assigned to warehouse manager successfully');
+      setAssignModal({ visible: false, order: null });
+      setAssigningPickupMemberId(null);
+      fetchOrders();
+    } catch (error) {
+      appMessage.error(
+        error?.error?.message || error?.response?.data?.message || 'Failed to assign order'
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleAssignLogistics = async () => {
+    if (!assigningLogisticsPartnerId) {
+      appMessage.warning('Please select a logistics partner');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await api.post(`/orders/${assignLogisticsModal.order._id}/assign-logistics`, {
+        logisticsPartnerId: assigningLogisticsPartnerId
+      });
+      appMessage.success('Order assigned to logistics partner successfully');
+      setAssignLogisticsModal({ visible: false, order: null });
+      setAssigningLogisticsPartnerId(null);
+      fetchOrders();
+    } catch (error) {
+      appMessage.error(
+        error?.error?.message || error?.response?.data?.message || 'Failed to assign logistics'
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleApproveDelivery = async (order) => {
+    try {
+      await api.patch(`/orders/${order._id}/approve-delivery`);
+      appMessage.success('Delivery approved. Order marked as delivered.');
+      fetchOrders();
+    } catch (error) {
+      appMessage.error(
+        error?.error?.message || error?.response?.data?.message || 'Failed to approve delivery'
+      );
+    }
+  };
+
+  const handleOpenRejectModal = (order) => {
+    setRejectionReason('');
+    setRejectModal({ visible: true, order });
+  };
+
+  const handleRejectDelivery = async () => {
+    if (!rejectionReason.trim()) {
+      appMessage.warning('Please enter a rejection reason');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await api.patch(`/orders/${rejectModal.order._id}/reject-delivery`, {
+        rejectionReason
+      });
+      appMessage.success('Delivery rejected. Order reverted to out for delivery.');
+      setRejectModal({ visible: false, order: null });
+      setRejectionReason('');
+      fetchOrders();
+    } catch (error) {
+      appMessage.error(
+        error?.error?.message || error?.response?.data?.message || 'Failed to reject delivery'
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const userColumns = [
@@ -747,6 +1122,19 @@ const AdminDashboard = () => {
           <span className="ml-auto text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
             {users.length}
           </span>
+        </div>
+
+        <div
+          className="mx-2 mb-2 px-4 py-3 hover:bg-indigo-50 cursor-pointer flex items-center gap-3 text-slate-600 hover:text-indigo-600 rounded-xl transition-all duration-300"
+          onClick={() => navigate('/admin/staff-approvals')}
+        >
+          <UserOutlined className="text-xl" />
+          <span className="font-medium">Staff Approvals</span>
+          {(pendingPickupMembers + pendingLogisticsPartners) > 0 && (
+            <span className="ml-auto text-xs bg-orange-500 text-white px-2 py-0.5 rounded-full animate-pulse">
+              {pendingPickupMembers + pendingLogisticsPartners}
+            </span>
+          )}
         </div>
 
         <div
@@ -1280,11 +1668,11 @@ const AdminDashboard = () => {
                                     if (val) {
                                       localStorage.setItem(storageKey, val);
                                       window.dispatchEvent(new Event('storage'));
-                                      message.success(`Image updated for ${card.label}`);
+                                      appMessage.success(`Image updated for ${card.label}`);
                                     } else {
                                       localStorage.removeItem(storageKey);
                                       window.dispatchEvent(new Event('storage'));
-                                      message.info(`Image removed for ${card.label}`);
+                                      appMessage.info(`Image removed for ${card.label}`);
                                     }
                                   }}
                                   className="px-4 py-2 rounded-lg text-sm font-semibold text-white"
@@ -1301,6 +1689,500 @@ const AdminDashboard = () => {
                         })}
                       </div>
                     </div>
+                  )
+                },
+                {
+                  key: 'all_orders',
+                  label: (
+                    <div className="flex items-center gap-2">
+                      <FilterOutlined />
+                      <span>All Orders {orders.length > 0 && `(${orders.length})`}</span>
+                    </div>
+                  ),
+                  children: (() => {
+                    // ── Compute unique bundle names for the filter dropdown ──
+                    const allBundleNames = [...new Set(
+                      orders.flatMap(o => (o.orderedBundles || []).map(b => b.bundleName).filter(Boolean))
+                    )].sort();
+
+                    // ── Apply filters ──────────────────────────────────────
+                    const filteredOrders = orders.filter(o => {
+                      // Status filter
+                      if (orderFilterStatus !== 'all' && o.status !== orderFilterStatus) return false;
+
+                      // Bundle/category filter
+                      if (orderFilterBundle !== 'all') {
+                        const names = (o.orderedBundles || []).map(b => b.bundleName);
+                        if (!names.includes(orderFilterBundle)) return false;
+                      }
+
+                      // Date range filter
+                      const [from, to] = orderFilterDateRange;
+                      if (from && to) {
+                        const created = new Date(o.createdAt);
+                        const start = from.startOf('day').toDate();
+                        const end   = to.endOf('day').toDate();
+                        if (created < start || created > end) return false;
+                      }
+
+                      return true;
+                    });
+
+                    const STATUS_COLORS = {
+                      pending:          'default',
+                      assigned:         'blue',
+                      packed:           'cyan',
+                      out_for_delivery: 'orange',
+                      under_review:     'purple',
+                      delivered:        'green',
+                    };
+                    const STATUS_LABELS = {
+                      pending:          'Pending',
+                      assigned:         'Assigned',
+                      packed:           'Packed',
+                      out_for_delivery: 'Out for Delivery',
+                      under_review:     'Under Review',
+                      delivered:        'Delivered',
+                    };
+
+                    return (
+                      <div>
+                        {/* ── Filter bar ── */}
+                        <div className="flex flex-wrap items-center gap-3 mb-5 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                          <span className="text-sm font-semibold text-slate-600 flex items-center gap-1">
+                            <FilterOutlined /> Filters:
+                          </span>
+
+                          {/* Status filter */}
+                          <Select
+                            value={orderFilterStatus}
+                            onChange={setOrderFilterStatus}
+                            style={{ width: 170 }}
+                            size="small"
+                          >
+                            <Select.Option value="all">All Statuses</Select.Option>
+                            <Select.Option value="pending">Pending</Select.Option>
+                            <Select.Option value="assigned">Assigned</Select.Option>
+                            <Select.Option value="packed">Packed</Select.Option>
+                            <Select.Option value="out_for_delivery">Out for Delivery</Select.Option>
+                            <Select.Option value="under_review">Under Review</Select.Option>
+                            <Select.Option value="delivered">Delivered</Select.Option>
+                          </Select>
+
+                          {/* Bundle / category filter */}
+                          <Select
+                            value={orderFilterBundle}
+                            onChange={setOrderFilterBundle}
+                            style={{ width: 200 }}
+                            size="small"
+                          >
+                            <Select.Option value="all">All Bundle Types</Select.Option>
+                            {allBundleNames.map(name => (
+                              <Select.Option key={name} value={name}>{name}</Select.Option>
+                            ))}
+                          </Select>
+
+                          {/* Date range filter */}
+                          <DatePicker.RangePicker
+                            size="small"
+                            value={orderFilterDateRange}
+                            onChange={dates => setOrderFilterDateRange(dates || [null, null])}
+                            format="DD MMM YYYY"
+                            allowClear
+                            placeholder={['From date', 'To date']}
+                          />
+
+                          {/* Clear filters */}
+                          {(orderFilterStatus !== 'all' || orderFilterBundle !== 'all' || orderFilterDateRange[0]) && (
+                            <Button
+                              size="small"
+                              onClick={() => {
+                                setOrderFilterStatus('all');
+                                setOrderFilterBundle('all');
+                                setOrderFilterDateRange([null, null]);
+                              }}
+                            >
+                              Clear
+                            </Button>
+                          )}
+
+                          <span className="ml-auto text-xs text-slate-500">
+                            Showing {filteredOrders.length} of {orders.length} orders
+                          </span>
+
+                          <Button size="small" onClick={fetchOrders} loading={ordersLoading}>
+                            Refresh
+                          </Button>
+                        </div>
+
+                        {/* ── Orders table ── */}
+                        <Table
+                          columns={[
+                            {
+                              title: 'Order ID',
+                              key: 'orderId',
+                              render: (_, o) => <Tag color="blue" className="font-mono">{shortId(o._id)}</Tag>
+                            },
+                            {
+                              title: 'User',
+                              key: 'user',
+                              render: (_, o) => (
+                                <div>
+                                  <div className="font-medium text-slate-800">{o.userId?.name || '—'}</div>
+                                  <div className="text-xs text-slate-500">{o.userId?.email || shortId(o.userId)}</div>
+                                </div>
+                              )
+                            },
+                            {
+                              title: 'Bundle Types',
+                              key: 'bundles',
+                              render: (_, o) => (
+                                <div className="flex flex-wrap gap-1">
+                                  {(o.orderedBundles || []).map((b, i) => (
+                                    <Tag key={i} color="geekblue" className="text-xs">
+                                      {b.bundleName} ×{b.quantity}
+                                    </Tag>
+                                  ))}
+                                </div>
+                              )
+                            },
+                            {
+                              title: 'Status',
+                              key: 'status',
+                              render: (_, o) => (
+                                <Tag color={STATUS_COLORS[o.status] || 'default'}>
+                                  {STATUS_LABELS[o.status] || o.status}
+                                </Tag>
+                              ),
+                              filters: Object.entries(STATUS_LABELS).map(([v, t]) => ({ text: t, value: v })),
+                              onFilter: (value, record) => record.status === value,
+                            },
+                            {
+                              title: 'Assigned To',
+                              key: 'assignedTo',
+                              render: (_, o) => o.assignedPickupMemberId?.name
+                                ? <span className="text-slate-700">{o.assignedPickupMemberId.name}</span>
+                                : <span className="text-slate-400">—</span>
+                            },
+                            {
+                              title: 'Created At',
+                              key: 'createdAt',
+                              render: (_, o) => o.createdAt
+                                ? new Date(o.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                                : '—',
+                              sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+                              defaultSortOrder: 'descend',
+                            },
+                            {
+                              title: 'Action',
+                              key: 'action',
+                              render: (_, o) => o.status === 'pending' ? (
+                                <Button
+                                  type="primary"
+                                  size="small"
+                                  icon={<UserOutlined />}
+                                  onClick={() => handleOpenAssignModal(o)}
+                                  className="bg-gradient-to-r from-indigo-500 to-purple-600 border-0"
+                                >
+                                  Assign
+                                </Button>
+                              ) : o.status === 'under_review' ? (
+                                <div className="space-x-1">
+                                  <Button
+                                    size="small"
+                                    type="primary"
+                                    icon={<CheckOutlined />}
+                                    onClick={() => handleApproveDelivery(o)}
+                                    style={{ background: '#10b981', borderColor: '#10b981' }}
+                                  >
+                                    Approve
+                                  </Button>
+                                  <Button
+                                    size="small"
+                                    danger
+                                    icon={<CloseOutlined />}
+                                    onClick={() => handleOpenRejectModal(o)}
+                                  >
+                                    Reject
+                                  </Button>
+                                </div>
+                              ) : (
+                                <span className="text-xs text-slate-400">—</span>
+                              )
+                            }
+                          ]}
+                          dataSource={filteredOrders}
+                          rowKey="_id"
+                          loading={ordersLoading}
+                          pagination={{ pageSize: 15, showSizeChanger: true, showTotal: (t) => `${t} orders` }}
+                          scroll={{ x: 1000 }}
+                          locale={{ emptyText: 'No orders match the selected filters' }}
+                        />
+                      </div>
+                    );
+                  })()
+                },
+                {
+                  key: 'pending_orders',
+                  label: (
+                    <div className="flex items-center gap-2">
+                      <ShopOutlined />
+                      <span>Pending Orders {orders.filter(o => o.status === 'pending').length > 0 && `(${orders.filter(o => o.status === 'pending').length})`}</span>
+                    </div>
+                  ),
+                  children: (
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-slate-800">Pending Orders — Assign to Warehouse Manager</h3>
+                        <Button onClick={fetchOrders} loading={ordersLoading}>Refresh</Button>
+                      </div>
+                      <Table
+                        columns={[
+                          {
+                            title: 'Order ID',
+                            key: 'orderId',
+                            render: (_, o) => <Tag color="blue" className="font-mono">{shortId(o._id)}</Tag>
+                          },
+                          {
+                            title: 'User',
+                            key: 'user',
+                            render: (_, o) => (
+                              <div>
+                                <div className="font-medium">{o.userId?.name || '—'}</div>
+                                <div className="text-xs text-slate-500">{o.userId?.email || shortId(o.userId)}</div>
+                              </div>
+                            )
+                          },
+                          {
+                            title: 'Subscription ID',
+                            key: 'subId',
+                            render: (_, o) => <span className="font-mono text-sm">{shortId(o.subscriptionId?._id || o.subscriptionId)}</span>
+                          },
+                          {
+                            title: 'Bundle Types',
+                            key: 'bundles',
+                            render: (_, o) => (
+                              <div className="flex flex-wrap gap-1">
+                                {(o.orderedBundles || []).map((b, i) => (
+                                  <Tag key={i} color="geekblue" className="text-xs">{b.bundleName} ×{b.quantity}</Tag>
+                                ))}
+                                {o.orderType === 'renewal' && (
+                                  <Tag color="volcano" className="text-xs">Renewal</Tag>
+                                )}
+                              </div>
+                            )
+                          },
+                          {
+                            title: 'Created At',
+                            key: 'createdAt',
+                            render: (_, o) => o.createdAt
+                              ? new Date(o.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                              : '—',
+                            sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+                            defaultSortOrder: 'descend',
+                          },
+                          {
+                            title: 'Action',
+                            key: 'action',
+                            render: (_, o) => (
+                              <Button
+                                type="primary"
+                                size="small"
+                                icon={<UserOutlined />}
+                                onClick={() => handleOpenAssignModal(o)}
+                                className="bg-gradient-to-r from-indigo-500 to-purple-600 border-0"
+                              >
+                                Assign Warehouse
+                              </Button>
+                            )
+                          }
+                        ]}
+                        dataSource={orders.filter(o => o.status === 'pending')}
+                        rowKey="_id"
+                        loading={ordersLoading}
+                        pagination={{ pageSize: 10 }}
+                        scroll={{ x: 800 }}
+                        locale={{ emptyText: 'No pending orders' }}
+                      />
+                    </div>
+                  )
+                },
+                {
+                  key: 'ready_for_pickup',
+                  label: (
+                    <div className="flex items-center gap-2">
+                      <TruckOutlined />
+                      <span>Ready for Pickup {orders.filter(o => o.status === 'ready_for_pickup').length > 0 && `(${orders.filter(o => o.status === 'ready_for_pickup').length})`}</span>
+                    </div>
+                  ),
+                  children: (
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-slate-800">Ready for Pickup — Assign to Logistics Partner</h3>
+                        <Button onClick={fetchOrders} loading={ordersLoading}>Refresh</Button>
+                      </div>
+                      <Table
+                        columns={[
+                          {
+                            title: 'Order ID',
+                            key: 'orderId',
+                            render: (_, o) => <Tag color="geekblue" className="font-mono">{shortId(o._id)}</Tag>
+                          },
+                          {
+                            title: 'User',
+                            key: 'user',
+                            render: (_, o) => (
+                              <div>
+                                <div className="font-medium">{o.userId?.name || '—'}</div>
+                                <div className="text-xs text-slate-500">{o.userId?.email || shortId(o.userId)}</div>
+                              </div>
+                            )
+                          },
+                          {
+                            title: 'Bundle Types',
+                            key: 'bundles',
+                            render: (_, o) => (
+                              <div className="flex flex-wrap gap-1">
+                                {(o.orderedBundles || []).map((b, i) => (
+                                  <Tag key={i} color="geekblue" className="text-xs">{b.bundleName} ×{b.quantity}</Tag>
+                                ))}
+                                {o.orderType === 'renewal' && (
+                                  <Tag color="volcano" className="text-xs">Renewal</Tag>
+                                )}
+                              </div>
+                            )
+                          },
+                          {
+                            title: 'Warehouse Manager',
+                            key: 'wm',
+                            render: (_, o) => o.assignedWarehouseManagerId?.name || shortId(o.assignedWarehouseManagerId) || '—'
+                          },
+                          {
+                            title: 'Action',
+                            key: 'action',
+                            render: (_, o) => (
+                              <Button
+                                type="primary"
+                                size="small"
+                                icon={<TruckOutlined />}
+                                onClick={() => handleOpenAssignLogisticsModal(o)}
+                                style={{ background: '#10b981', borderColor: '#10b981' }}
+                              >
+                                Assign Logistics
+                              </Button>
+                            )
+                          }
+                        ]}
+                        dataSource={orders.filter(o => o.status === 'ready_for_pickup')}
+                        rowKey="_id"
+                        loading={ordersLoading}
+                        pagination={{ pageSize: 10 }}
+                        scroll={{ x: 800 }}
+                        locale={{ emptyText: 'No orders ready for pickup' }}
+                      />
+                    </div>
+                  )
+                },
+                {
+                  key: 'delivery_review',
+                  label: (
+                    <div className="flex items-center gap-2">
+                      <TruckOutlined />
+                      <span>Delivery Review {orders.filter(o => o.status === 'under_review').length > 0 && `(${orders.filter(o => o.status === 'under_review').length})`}</span>
+                    </div>
+                  ),
+                  children: (
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-slate-800">Delivery Review</h3>
+                        <Button onClick={fetchOrders} loading={ordersLoading}>Refresh</Button>
+                      </div>
+                      <Table
+                        columns={[
+                          {
+                            title: 'Order ID',
+                            key: 'orderId',
+                            render: (_, o) => <Tag color="purple" className="font-mono">{shortId(o._id)}</Tag>
+                          },
+                          {
+                            title: 'Logistics Partner',
+                            key: 'pm',
+                            render: (_, o) => o.assignedLogisticsPartnerId?.name || shortId(o.assignedLogisticsPartnerId) || '—'
+                          },
+                          {
+                            title: 'Delivery Address',
+                            key: 'address',
+                            render: (_, o) => o.deliveryForm
+                              ? `${o.deliveryForm.buildingName || ''}, Floor ${o.deliveryForm.floor || ''}, Room ${o.deliveryForm.roomNumber || ''}`
+                              : '—'
+                          },
+                          {
+                            title: 'Images',
+                            key: 'images',
+                            render: (_, o) => {
+                              const imgs = o.deliveryForm?.images || [];
+                              if (!imgs.length) return '—';
+                              return (
+                                <Button
+                                  size="small"
+                                  icon={<EyeOutlined />}
+                                  onClick={() => {
+                                    setPreviewImages(imgs);
+                                    setPreviewIndex(0);
+                                    setPreviewVisible(true);
+                                  }}
+                                >
+                                  View {imgs.length} photo{imgs.length > 1 ? 's' : ''}
+                                </Button>
+                              );
+                            }
+                          },
+                          {
+                            title: 'Actions',
+                            key: 'actions',
+                            render: (_, o) => (
+                              <div className="space-x-2">
+                                <Button
+                                  size="small"
+                                  type="primary"
+                                  icon={<CheckOutlined />}
+                                  onClick={() => handleApproveDelivery(o)}
+                                  style={{ background: '#10b981', borderColor: '#10b981' }}
+                                >
+                                  Approve
+                                </Button>
+                                <Button
+                                  size="small"
+                                  danger
+                                  icon={<CloseOutlined />}
+                                  onClick={() => handleOpenRejectModal(o)}
+                                >
+                                  Reject
+                                </Button>
+                              </div>
+                            )
+                          }
+                        ]}
+                        dataSource={orders.filter(o => o.status === 'under_review')}
+                        rowKey="_id"
+                        loading={ordersLoading}
+                        pagination={{ pageSize: 10 }}
+                        scroll={{ x: 900 }}
+                        locale={{ emptyText: 'No deliveries awaiting review' }}
+                      />
+                    </div>
+                  )
+                },
+                {
+                  key: 'quality_checks',
+                  label: (
+                    <div className="flex items-center gap-2">
+                      <span>🔍</span>
+                      <span>Quality Checks</span>
+                    </div>
+                  ),
+                  children: (
+                    <QualityChecksPanel />
                   )
                 }
               ]}
@@ -1710,6 +2592,139 @@ const AdminDashboard = () => {
               </div>
             )}
           </Modal>
+
+          {/* Assign Warehouse Manager Modal */}
+          <Modal
+            title={`Assign Order #${shortId(assignModal.order?._id)} to Warehouse Manager`}
+            open={assignModal.visible}
+            onCancel={() => { setAssignModal({ visible: false, order: null }); setAssigningPickupMemberId(null); }}
+            onOk={handleAssignOrder}
+            okText="Assign"
+            confirmLoading={submitting}
+            okButtonProps={{ disabled: !assigningPickupMemberId }}
+          >
+            <p className="mb-4 text-slate-600">
+              Select an approved warehouse manager to handle this order.
+            </p>
+            <Select
+              style={{ width: '100%' }}
+              placeholder="Select warehouse manager"
+              value={assigningPickupMemberId}
+              onChange={setAssigningPickupMemberId}
+              showSearch
+              filterOption={(input, option) =>
+                option.children?.toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              {pickupMembers.map(pm => (
+                <Select.Option key={pm._id} value={pm._id}>
+                  {pm.name} ({pm.email})
+                </Select.Option>
+              ))}
+            </Select>
+          </Modal>
+
+          {/* Assign Logistics Partner Modal */}
+          <Modal
+            title={`Assign Order #${shortId(assignLogisticsModal.order?._id)} to Logistics Partner`}
+            open={assignLogisticsModal.visible}
+            onCancel={() => { setAssignLogisticsModal({ visible: false, order: null }); setAssigningLogisticsPartnerId(null); }}
+            onOk={handleAssignLogistics}
+            okText="Assign"
+            confirmLoading={submitting}
+            okButtonProps={{ disabled: !assigningLogisticsPartnerId }}
+          >
+            <p className="mb-4 text-slate-600">
+              Select an approved logistics partner to deliver this order.
+            </p>
+            <Select
+              style={{ width: '100%' }}
+              placeholder="Select logistics partner"
+              value={assigningLogisticsPartnerId}
+              onChange={setAssigningLogisticsPartnerId}
+              showSearch
+              filterOption={(input, option) =>
+                option.children?.toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              {logisticsPartners.map(lp => (
+                <Select.Option key={lp._id} value={lp._id}>
+                  {lp.name} ({lp.email})
+                </Select.Option>
+              ))}
+            </Select>
+          </Modal>
+
+          {/* Reject Delivery Modal */}
+          <Modal
+            title={`Reject Delivery — Order #${shortId(rejectModal.order?._id)}`}
+            open={rejectModal.visible}
+            onCancel={() => { setRejectModal({ visible: false, order: null }); setRejectionReason(''); }}
+            onOk={handleRejectDelivery}
+            okText="Reject Delivery"
+            okButtonProps={{ danger: true, disabled: !rejectionReason.trim() }}
+            confirmLoading={submitting}
+          >
+            <p className="mb-3 text-slate-600">
+              Please provide a reason for rejecting this delivery. The pickup member will be notified.
+            </p>
+            <TextArea
+              rows={4}
+              placeholder="Enter rejection reason..."
+              value={rejectionReason}
+              onChange={e => setRejectionReason(e.target.value)}
+            />
+          </Modal>
+
+          {/* Image Preview Modal */}
+          <Modal
+            open={previewVisible}
+            footer={null}
+            onCancel={() => setPreviewVisible(false)}
+            width={800}
+            title={`Delivery Photos (${previewIndex + 1} / ${previewImages.length})`}
+          >
+            {previewImages.length > 0 && (
+              <div>
+                <img
+                  src={previewImages[previewIndex]}
+                  alt={`Delivery photo ${previewIndex + 1}`}
+                  style={{ width: '100%', borderRadius: 8, maxHeight: 500, objectFit: 'contain' }}
+                />
+                {previewImages.length > 1 && (
+                  <div className="flex justify-center gap-4 mt-4">
+                    <Button
+                      disabled={previewIndex === 0}
+                      onClick={() => setPreviewIndex(i => i - 1)}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      disabled={previewIndex === previewImages.length - 1}
+                      onClick={() => setPreviewIndex(i => i + 1)}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+                <div className="flex gap-2 mt-4 flex-wrap">
+                  {previewImages.map((img, idx) => (
+                    <img
+                      key={idx}
+                      src={img}
+                      alt={`thumb ${idx + 1}`}
+                      onClick={() => setPreviewIndex(idx)}
+                      style={{
+                        width: 60, height: 60, objectFit: 'cover', borderRadius: 6,
+                        cursor: 'pointer',
+                        border: idx === previewIndex ? '2px solid #6366f1' : '2px solid transparent'
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </Modal>
         </div>
       </Content>
     </Layout>
@@ -1718,3 +2733,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

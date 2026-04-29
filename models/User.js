@@ -34,9 +34,41 @@ const userSchema = new mongoose.Schema({
   },
   userType: {
     type: String,
-    enum: ['individual', 'business', 'admin'],
+    enum: ['individual', 'business', 'admin', 'warehouse_manager', 'logistics_partner'],
     required: [true, 'User type is required'],
     default: 'individual'
+  },
+  // Warehouse Manager fields (formerly pickup_member)
+  warehouseManagerStatus: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected', null],
+    default: null
+  },
+  warehouseManagerApprovedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  warehouseManagerApprovedAt: {
+    type: Date
+  },
+  warehouseManagerRejectionReason: {
+    type: String
+  },
+  // Logistics Partner fields (new)
+  logisticsPartnerStatus: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected', null],
+    default: null
+  },
+  logisticsPartnerApprovedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  logisticsPartnerApprovedAt: {
+    type: Date
+  },
+  logisticsPartnerRejectionReason: {
+    type: String
   },
   authProvider: {
     type: String,
@@ -65,11 +97,10 @@ const userSchema = new mongoose.Schema({
   timestamps: true // Adds createdAt and updatedAt
 });
 
-// Indexes for performance
-userSchema.index({ email: 1 });
-userSchema.index({ mobile: 1 });
-userSchema.index({ googleId: 1 });
+// Indexes for performance (userType only — email/mobile/googleId already indexed via unique:true)
 userSchema.index({ userType: 1 });
+userSchema.index({ warehouseManagerStatus: 1 });
+userSchema.index({ logisticsPartnerStatus: 1 });
 
 // Instance method to check if account is locked
 userSchema.methods.isAccountLocked = function() {

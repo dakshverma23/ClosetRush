@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Card, Row, Col, Statistic, Table, Tag, Button, message, Modal, Spin } from 'antd';
+import { Layout, Card, Row, Col, Statistic, Table, Tag, Button, Modal, Spin } from 'antd';
+import appMessage from '../../utils/message';
 import { DollarOutlined, ShoppingOutlined, InboxOutlined, PlusOutlined, UserOutlined, HomeOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
@@ -7,6 +8,30 @@ import BackButton from '../../components/layout/BackButton';
 import api from '../../services/api';
 
 const { Content } = Layout;
+
+const STATUS_LABELS = {
+  pending:                'Preparing Your Order',
+  assigned_to_warehouse:  'Warehouse Assigned',
+  packed:                 'Packed & Ready',
+  ready_for_pickup:       'Ready for Pickup',
+  assigned_to_logistics:  'Delivery Partner Assigned',
+  out_for_delivery:       'Out for Delivery',
+  under_review:           'Delivery Under Review',
+  delivered:              'Delivered'
+};
+
+const STATUS_COLORS = {
+  pending:                'default',
+  assigned_to_warehouse:  'blue',
+  packed:                 'cyan',
+  ready_for_pickup:       'geekblue',
+  assigned_to_logistics:  'purple',
+  out_for_delivery:       'orange',
+  under_review:           'gold',
+  delivered:              'green'
+};
+
+const shortId = (id) => (id ? String(id).slice(-8) : '—');
 
 const IndividualDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -18,10 +43,13 @@ const IndividualDashboard = () => {
     totalDeposit: 0,
     itemsHolding: 0
   });
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchDashboardData();
+    fetchOrders();
   }, []);
 
   const fetchDashboardData = async () => {
@@ -50,30 +78,42 @@ const IndividualDashboard = () => {
         itemsHolding: itemsCount
       });
     } catch (error) {
-      message.error('Failed to load dashboard data');
+      appMessage.error('Failed to load dashboard data');
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchOrders = async () => {
+    setOrdersLoading(true);
+    try {
+      const response = await api.get('/orders');
+      setOrders(response.data.orders || []);
+    } catch (error) {
+      appMessage.error('Failed to load orders');
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
   const handlePauseSubscription = async (id) => {
     try {
       await api.patch(`/subscriptions/${id}/pause`);
-      message.success('Subscription paused successfully');
+      appMessage.success('Subscription paused successfully');
       fetchDashboardData();
     } catch (error) {
-      message.error(error.error?.message || 'Failed to pause subscription');
+      appMessage.error(error.error?.message || 'Failed to pause subscription');
     }
   };
 
   const handleResumeSubscription = async (id) => {
     try {
       await api.patch(`/subscriptions/${id}/resume`);
-      message.success('Subscription resumed successfully');
+      appMessage.success('Subscription resumed successfully');
       fetchDashboardData();
     } catch (error) {
-      message.error(error.error?.message || 'Failed to resume subscription');
+      appMessage.error(error.error?.message || 'Failed to resume subscription');
     }
   };
 
@@ -86,10 +126,10 @@ const IndividualDashboard = () => {
       onOk: async () => {
         try {
           await api.delete(`/subscriptions/${id}`);
-          message.success('Subscription cancelled successfully');
+          appMessage.success('Subscription cancelled successfully');
           fetchDashboardData();
         } catch (error) {
-          message.error(error.error?.message || 'Failed to cancel subscription');
+          appMessage.error(error.error?.message || 'Failed to cancel subscription');
         }
       }
     });
@@ -407,6 +447,61 @@ const IndividualDashboard = () => {
             />
           </Card>
 
+          {/* My Orders */}
+          <Card className="card-modern-glass mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-text-primary">My Orders</h2>
+              <Button onClick={fetchOrders} loading={ordersLoading}>Refresh</Button>
+            </div>
+            <Table
+              columns={[
+                {
+                  title: 'Order ID',
+                  key: 'orderId',
+                  render: (_, o) => <Tag color="blue" className="font-mono">{shortId(o._id)}</Tag>
+                },
+                {
+                  title: 'Bundle Types',
+                  key: 'bundles',
+                  render: (_, o) => (o.orderedBundles || []).map(b => b.bundleName).join(', ') || '—'
+                },
+                {
+                  title: 'Status',
+                  key: 'status',
+                  render: (_, o) => (
+                    <Tag color={STATUS_COLORS[o.status] || 'default'}>
+                      {STATUS_LABELS[o.status] || o.status}
+                    </Tag>
+                  )
+                },
+                {
+                  title: 'Bundle IDs',
+                  key: 'bundleIds',
+                  render: (_, o) => {
+                    if (!['out_for_delivery', 'under_review', 'delivered'].includes(o.status)) {
+                      return <span className="text-gray-400">—</span>;
+                    }
+                    const ids = (o.builtBundles || []).map(b => b.bundleId).filter(Boolean);
+                    return ids.length > 0
+                      ? <div className="text-xs font-mono">{ids.join(', ')}</div>
+                      : <span className="text-gray-400">—</span>;
+                  }
+                },
+                {
+                  title: 'Created At',
+                  key: 'createdAt',
+                  render: (_, o) => o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '—'
+                }
+              ]}
+              dataSource={orders}
+              rowKey="_id"
+              loading={ordersLoading}
+              pagination={{ pageSize: 10 }}
+              scroll={{ x: 800 }}
+              locale={{ emptyText: 'No orders yet' }}
+            />
+          </Card>
+
           {/* Inventory */}
           <Card 
             title={
@@ -434,3 +529,4 @@ const IndividualDashboard = () => {
 };
 
 export default IndividualDashboard;
+

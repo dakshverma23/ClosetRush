@@ -25,6 +25,30 @@ const register = async (req, res, next) => {
       throw ApiError.badRequest(passwordValidation.message);
     }
 
+    // Determine user type — respect explicit staff types from frontend,
+    // otherwise auto-detect @closetrush.com as warehouse_manager
+    const staffTypes = ['warehouse_manager', 'logistics_partner'];
+    let finalUserType = userType || 'individual';
+    let warehouseManagerStatus = undefined;
+    let logisticsPartnerStatus = undefined;
+
+    if (staffTypes.includes(userType)) {
+      // Explicit staff registration from the staff portal
+      finalUserType = userType;
+      if (!email.endsWith('@closetrush.com')) {
+        throw ApiError.badRequest('Staff accounts must use a @closetrush.com email address');
+      }
+      if (userType === 'warehouse_manager') {
+        warehouseManagerStatus = 'pending';
+      } else if (userType === 'logistics_partner') {
+        logisticsPartnerStatus = 'pending';
+      }
+    } else if (email.endsWith('@closetrush.com') && !userType) {
+      // Legacy fallback: @closetrush.com with no explicit type → warehouse_manager
+      finalUserType = 'warehouse_manager';
+      warehouseManagerStatus = 'pending';
+    }
+
     // Check if user already exists
     const existingUser = await User.findOne({
       $or: [{ email }, { mobile }]
@@ -49,8 +73,10 @@ const register = async (req, res, next) => {
       mobile,
       password: hashedPassword,
       address,
-      userType: userType || 'individual',
-      authProvider: 'email'
+      userType: finalUserType,
+      authProvider: 'email',
+      warehouseManagerStatus,
+      logisticsPartnerStatus
     });
 
     // Generate JWT token
@@ -59,10 +85,17 @@ const register = async (req, res, next) => {
     // Create session
     await Session.createSession(user._id, token);
 
+    // Different response message for staff types
+    const isStaff = ['warehouse_manager', 'logistics_partner'].includes(finalUserType);
+    const message = isStaff
+      ? `${finalUserType === 'warehouse_manager' ? 'Warehouse manager' : 'Logistics partner'} registration submitted. Awaiting admin approval.`
+      : 'User registered successfully';
+
     res.status(201).json({
-      message: 'User registered successfully',
+      message,
       token,
-      user: user.toJSON()
+      user: user.toJSON(),
+      requiresApproval: isStaff
     });
 
   } catch (error) {
@@ -102,6 +135,26 @@ const login = async (req, res, next) => {
     // Check if account is active
     if (!user.active) {
       throw ApiError.forbidden('Account is deactivated. Please contact support.');
+    }
+
+    // Check staff approval status
+    if (user.userType === 'warehouse_manager' && user.warehouseManagerStatus !== 'approved') {
+      if (user.warehouseManagerStatus === 'pending') {
+        throw ApiError.forbidden('Your warehouse manager account is pending admin approval.', 'PENDING_APPROVAL');
+      }
+      throw ApiError.forbidden(
+        `Your warehouse manager account was rejected. Reason: ${user.warehouseManagerRejectionReason || 'Not specified'}`,
+        'ACCOUNT_REJECTED'
+      );
+    }
+    if (user.userType === 'logistics_partner' && user.logisticsPartnerStatus !== 'approved') {
+      if (user.logisticsPartnerStatus === 'pending') {
+        throw ApiError.forbidden('Your logistics partner account is pending admin approval.', 'PENDING_APPROVAL');
+      }
+      throw ApiError.forbidden(
+        `Your logistics partner account was rejected. Reason: ${user.logisticsPartnerRejectionReason || 'Not specified'}`,
+        'ACCOUNT_REJECTED'
+      );
     }
 
     // Verify password
@@ -166,6 +219,26 @@ const loginWithMobile = async (req, res, next) => {
     // Check if account is active
     if (!user.active) {
       throw ApiError.forbidden('Account is deactivated. Please contact support.');
+    }
+
+    // Check staff approval status
+    if (user.userType === 'warehouse_manager' && user.warehouseManagerStatus !== 'approved') {
+      if (user.warehouseManagerStatus === 'pending') {
+        throw ApiError.forbidden('Your warehouse manager account is pending admin approval.', 'PENDING_APPROVAL');
+      }
+      throw ApiError.forbidden(
+        `Your warehouse manager account was rejected. Reason: ${user.warehouseManagerRejectionReason || 'Not specified'}`,
+        'ACCOUNT_REJECTED'
+      );
+    }
+    if (user.userType === 'logistics_partner' && user.logisticsPartnerStatus !== 'approved') {
+      if (user.logisticsPartnerStatus === 'pending') {
+        throw ApiError.forbidden('Your logistics partner account is pending admin approval.', 'PENDING_APPROVAL');
+      }
+      throw ApiError.forbidden(
+        `Your logistics partner account was rejected. Reason: ${user.logisticsPartnerRejectionReason || 'Not specified'}`,
+        'ACCOUNT_REJECTED'
+      );
     }
 
     // Verify password

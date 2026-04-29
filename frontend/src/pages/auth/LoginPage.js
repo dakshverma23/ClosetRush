@@ -26,6 +26,12 @@ const LoginPage = () => {
         navigate('/admin/dashboard');
       } else if (response.data.user.userType === 'business') {
         navigate('/business/dashboard');
+      } else if (response.data.user.userType === 'warehouse_manager') {
+        navigate('/warehouse/dashboard');
+      } else if (response.data.user.userType === 'logistics_partner') {
+        navigate('/logistics/dashboard');
+      } else if (response.data.user.userType === 'pickup_member') {
+        navigate('/pickup/dashboard');
       } else {
         navigate('/dashboard');
       }
@@ -206,6 +212,40 @@ const LoginPage = () => {
                   ← Back to Home
                 </Link>
               </div>
+            </div>
+          </div>
+
+          {/* Staff Login Links */}
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-3 bg-transparent text-gray-500 font-medium">Are you a staff member?</span>
+              </div>
+            </div>
+            <div className="mt-4 flex flex-col gap-3">
+              <Link to="/warehouse/login">
+                <Button
+                  block
+                  size="large"
+                  className="h-12 font-semibold rounded-xl border-2 border-blue-400 text-blue-600 hover:bg-blue-50 hover:border-blue-500"
+                  icon={<span className="mr-1">🏭</span>}
+                >
+                  Login as Warehouse Manager
+                </Button>
+              </Link>
+              <Link to="/logistics/login">
+                <Button
+                  block
+                  size="large"
+                  className="h-12 font-semibold rounded-xl border-2 border-green-400 text-green-600 hover:bg-green-50 hover:border-green-500"
+                  icon={<span className="mr-1">🚚</span>}
+                >
+                  Login as Logistics Partner
+                </Button>
+              </Link>
             </div>
           </div>
 

@@ -12,6 +12,7 @@ import {
   MenuOutlined,
   DownOutlined,
 } from '@ant-design/icons';
+import NotificationBell from './NotificationBell';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 
@@ -19,7 +20,7 @@ const navLinks = [
   { key: 'home',    label: 'Home',           to: '/',               icon: <HomeOutlined /> },
   { key: 'science', label: "This Ain't Optional", to: '/science-behind', icon: <InfoCircleOutlined /> },
   { key: 'offers',  label: 'What We Offer',  to: '/what-we-offer',  icon: <ShoppingOutlined /> },
-  { key: 'about',   label: 'About',          to: '/about',          icon: <InfoCircleOutlined /> },
+  { key: 'about',   label: 'About Us',          to: '/about',          icon: <InfoCircleOutlined /> },
 ];
 
 const Navbar = () => {
@@ -122,13 +123,16 @@ const Navbar = () => {
             {/* Desktop Right Action */}
             <div className="hidden lg:flex items-center gap-5">
               {isAuthenticated() ? (
-                <Dropdown menu={{ items: userDropdownItems }} placement="bottomRight" trigger={['click']}>
-                  <button className="flex items-center gap-3 p-1 pr-4 rounded-full hover:bg-slate-50 transition-all border border-slate-100 bg-white">
-                    <Avatar size={36} icon={<UserOutlined />} className="bg-slate-900" />
-                    <span className="text-sm font-black text-slate-800 tracking-tight">{user?.name?.split(' ')[0]}</span>
-                    <DownOutlined className="text-slate-400 text-[10px]" />
-                  </button>
-                </Dropdown>
+                <>
+                  <NotificationBell />
+                  <Dropdown menu={{ items: userDropdownItems }} placement="bottomRight" trigger={['click']}>
+                    <button className="flex items-center gap-3 p-1 pr-4 rounded-full hover:bg-slate-50 transition-all border border-slate-100 bg-white">
+                      <Avatar size={36} icon={<UserOutlined />} className="bg-slate-900" />
+                      <span className="text-sm font-black text-slate-800 tracking-tight">{user?.name?.split(' ')[0]}</span>
+                      <DownOutlined className="text-slate-400 text-[10px]" />
+                    </button>
+                  </Dropdown>
+                </>
               ) : (
                 <button
                   onClick={() => navigate('/register')}

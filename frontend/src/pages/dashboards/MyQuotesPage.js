@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Card, Table, Tag, Button, message, Spin, Empty, Descriptions, Modal, Timeline } from 'antd';
+import { Layout, Card, Table, Tag, Button, Spin, Empty, Descriptions, Modal, Timeline } from 'antd';
+import appMessage from '../../utils/message';
 import { ArrowLeftOutlined, EyeOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
@@ -25,7 +26,7 @@ const MyQuotesPage = () => {
       const response = await api.get('/quotes/my-quotes');
       setQuotes(response.data.quotes || []);
     } catch (error) {
-      message.error('Failed to load quotes');
+      appMessage.error('Failed to load quotes');
       console.error(error);
     } finally {
       setLoading(false);
@@ -326,3 +327,4 @@ const MyQuotesPage = () => {
 };
 
 export default MyQuotesPage;
+

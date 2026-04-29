@@ -4,7 +4,7 @@ const InventoryItem  = require('../models/InventoryItem');
 const PickupReport   = require('../models/PickupReport');
 const Subscription   = require('../models/Subscription');
 const { authenticate } = require('../middleware/auth');
-const { requireAdmin } = require('../middleware/rbac');
+const { requireAdmin, requireWarehouseManager } = require('../middleware/rbac');
 
 // ─── Subscriptions / Orders view (for inventory panel) ───────────────────────
 
@@ -27,8 +27,8 @@ router.get('/orders', authenticate, requireAdmin, async (req, res, next) => {
 });
 
 
-// GET all items (admin)
-router.get('/items', authenticate, requireAdmin, async (req, res, next) => {
+// GET all items (admin or warehouse manager)
+router.get('/items', authenticate, async (req, res, next) => {
   try {
     const { status, pgName, pincode, bundleId } = req.query;
     const filter = {};
@@ -37,10 +37,21 @@ router.get('/items', authenticate, requireAdmin, async (req, res, next) => {
     if (pincode)  filter.pincode  = pincode;
     if (bundleId) filter.bundleId = bundleId;
 
+    // Warehouse managers only see items linked to their orders
+    if (req.user.userType === 'warehouse_manager') {
+      const Order = require('../models/Order');
+      const myOrders = await Order.find({ assignedWarehouseManagerId: req.user._id }).select('_id');
+      const orderIds = myOrders.map(o => o._id);
+      filter.orderId = { $in: orderIds };
+    } else if (req.user.userType !== 'admin') {
+      return res.status(403).json({ error: { message: 'Access denied' } });
+    }
+
     const items = await InventoryItem.find(filter)
       .populate('bundleId', 'name')
       .populate('categoryId', 'name')
       .populate('assignedTo.userId', 'name email')
+      .populate('orderId', 'userId status')
       .sort({ createdAt: -1 });
 
     res.json({ success: true, count: items.length, items });
@@ -133,6 +144,18 @@ router.get('/reports', authenticate, requireAdmin, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// GET my own reports (warehouse manager — scoped to submittedBy)
+router.get('/my-reports', authenticate, requireWarehouseManager, async (req, res, next) => {
+  try {
+    const reports = await PickupReport.find({ submittedBy: req.user._id })
+      .populate('inventoryItemId', 'skuCode bagMarking')
+      .populate('bundleId', 'name')
+      .sort({ submittedAt: -1 });
+
+    res.json({ success: true, count: reports.length, reports });
+  } catch (err) { next(err); }
+});
+
 // GET single report
 router.get('/reports/:id', authenticate, requireAdmin, async (req, res, next) => {
   try {
@@ -145,8 +168,8 @@ router.get('/reports/:id', authenticate, requireAdmin, async (req, res, next) =>
   } catch (err) { next(err); }
 });
 
-// POST submit pickup report (authenticated user — pickup member)
-router.post('/reports', authenticate, async (req, res, next) => {
+// POST submit pickup report (authenticated warehouse manager)
+router.post('/reports', authenticate, requireWarehouseManager, async (req, res, next) => {
   try {
     const report = await PickupReport.create({
       ...req.body,

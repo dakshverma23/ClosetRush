@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Card, Row, Col, Statistic, Table, Tag, Button, message, Modal, Form, Input, Spin } from 'antd';
+import { Layout, Card, Row, Col, Statistic, Table, Tag, Button, Modal, Form, Input, Spin } from 'antd';
+import appMessage from '../../utils/message';
 import { HomeOutlined, ShoppingOutlined, DollarOutlined, InboxOutlined, PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
@@ -72,7 +73,7 @@ const BusinessDashboard = () => {
         totalInventory: totalInv
       });
     } catch (error) {
-      message.error('Failed to load dashboard data');
+      appMessage.error('Failed to load dashboard data');
       console.error(error);
     } finally {
       setLoading(false);
@@ -82,12 +83,12 @@ const BusinessDashboard = () => {
   const handleAddProperty = async (values) => {
     try {
       await api.post('/properties', values);
-      message.success('Property added successfully');
+      appMessage.success('Property added successfully');
       setIsModalVisible(false);
       form.resetFields();
       fetchDashboardData();
     } catch (error) {
-      message.error(error.error?.message || 'Failed to add property');
+      appMessage.error(error.error?.message || 'Failed to add property');
     }
   };
 
@@ -100,10 +101,10 @@ const BusinessDashboard = () => {
       onOk: async () => {
         try {
           await api.delete(`/properties/${id}`);
-          message.success('Property deleted successfully');
+          appMessage.success('Property deleted successfully');
           fetchDashboardData();
         } catch (error) {
-          message.error(error.error?.message || 'Failed to delete property');
+          appMessage.error(error.error?.message || 'Failed to delete property');
         }
       }
     });
@@ -362,3 +363,4 @@ const BusinessDashboard = () => {
 };
 
 export default BusinessDashboard;
+

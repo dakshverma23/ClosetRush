@@ -173,6 +173,40 @@ subscriptionRequestSchema.methods.createSubscription = async function() {
   this.status = 'subscription_created';
   await this.save();
 
+  // Create fulfillment Order for this subscription
+  // Determine if this is a renewal (prior subscription exists for same user + bundle)
+  const Order = require('./Order');
+  const User = require('./User');
+
+  const priorSub = await Subscription.findOne({
+    userId: this.userId,
+    bundleId: this.bundleId,
+    _id: { $ne: subscription._id }
+  });
+  const isRenewal = !!priorSub;
+
+  const newOrder = await Order.create({
+    userId:         this.userId,
+    subscriptionId: subscription._id,
+    orderedBundles: (bundle.items || []).map(item => ({
+      bundleTypeId: item.category,
+      bundleName:   bundle.name,
+      quantity:     item.quantity
+    })),
+    builtBundles: [],
+    status:       'pending',
+    orderType:    isRenewal ? 'renewal' : 'standard'
+  });
+
+  // Notify admin of renewal order
+  if (isRenewal) {
+    const { notifyRenewalOrderCreated } = require('../services/notificationService');
+    const admin = await User.findOne({ userType: 'admin' });
+    if (admin) {
+      await notifyRenewalOrderCreated(admin._id, newOrder);
+    }
+  }
+
   return subscription;
 };
 

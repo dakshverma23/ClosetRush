@@ -20,12 +20,14 @@ const { TextArea } = Input;
 
 // ── Status colours ────────────────────────────────────────────────────────────
 const STATUS_COLOR = {
-  in_stock:       'blue',
+  in_stock:       'green',
+  out_of_stock:   'orange',
+  dismantled:     'red',
   dispatched:     'cyan',
-  with_customer:  'green',
-  pickup_pending: 'orange',
+  with_customer:  'blue',
+  pickup_pending: 'gold',
   in_laundry:     'purple',
-  damaged:        'red',
+  damaged:        'volcano',
   retired:        'default'
 };
 const CONDITION_COLOR = {
@@ -276,44 +278,50 @@ export default function InventoryManagementPage() {
 
   const itemColumns = [
     {
-      title: 'SKU Code', dataIndex: 'skuCode', key: 'skuCode',
+      title: 'SKU Code', dataIndex: 'skuCode', key: 'skuCode', fixed: 'left',
       render: v => <Tag color="blue" className="font-mono font-bold">{v}</Tag>
-    },
-    {
-      title: 'Bundle', dataIndex: ['bundleId', 'name'], key: 'bundle',
-      render: v => v || '—'
     },
     {
       title: 'Category', dataIndex: ['categoryId', 'name'], key: 'category',
       render: v => v || '—'
     },
     {
-      title: 'PG Name', dataIndex: 'pgName', key: 'pgName',
-      render: v => v || <span className="text-gray-400">—</span>
-    },
-    {
-      title: 'Room', dataIndex: 'roomNo', key: 'roomNo',
+      title: 'Bundle', dataIndex: ['bundleId', 'name'], key: 'bundle',
       render: v => v || '—'
     },
     {
-      title: 'Area / PIN', key: 'location',
-      render: (_, r) => r.area ? `${r.area} – ${r.pincode || ''}` : '—'
-    },
-    {
-      title: 'Bag Marking', dataIndex: 'bagMarking', key: 'bagMarking',
-      render: v => v ? <Tag icon={<TagOutlined />}>{v}</Tag> : '—'
-    },
-    {
       title: 'Status', dataIndex: 'status', key: 'status',
-      render: v => <Tag color={STATUS_COLOR[v]}>{v?.replace(/_/g, ' ').toUpperCase()}</Tag>
+      render: v => <Tag color={STATUS_COLOR[v] || 'default'}>{v?.replace(/_/g, ' ').toUpperCase()}</Tag>
+    },
+    {
+      title: 'Bundle ID',
+      dataIndex: 'bundleBuiltId',
+      key: 'bundleBuiltId',
+      render: v => v
+        ? <Tag color="purple" className="font-mono text-xs">{v}</Tag>
+        : <span className="text-gray-400">—</span>
+    },
+    {
+      title: 'Bag ID',
+      dataIndex: 'bagMarking',
+      key: 'bagMarking',
+      render: v => v ? <Tag icon={<TagOutlined />}>{v}</Tag> : <span className="text-gray-400">—</span>
+    },
+    {
+      title: 'Dispatch Date',
+      dataIndex: 'dispatchDate',
+      key: 'dispatchDate',
+      render: (v, r) => {
+        if (r.status === 'out_of_stock' && v) {
+          return <Tag color="orange">{new Date(v).toLocaleDateString('en-IN')}</Tag>;
+        }
+        return <span className="text-gray-400">—</span>;
+      }
     },
     {
       title: 'Condition', dataIndex: 'condition', key: 'condition',
+      responsive: ['lg'],
       render: v => <Tag color={CONDITION_COLOR[v]}>{v?.toUpperCase()}</Tag>
-    },
-    {
-      title: 'Dispatched', dataIndex: 'dispatchedAt', key: 'dispatchedAt',
-      render: v => v ? new Date(v).toLocaleDateString() : '—'
     },
     {
       title: 'Actions', key: 'actions',
@@ -786,9 +794,15 @@ export default function InventoryManagementPage() {
             <Col span={12}>
               <Form.Item label="Status" name="status" initialValue="in_stock">
                 <Select>
-                  {Object.keys(STATUS_COLOR).map(s => (
-                    <Option key={s} value={s}>{s.replace(/_/g, ' ').toUpperCase()}</Option>
-                  ))}
+                  <Option value="in_stock">✅ In Stock</Option>
+                  <Option value="out_of_stock">📦 Out of Stock</Option>
+                  <Option value="dismantled">🔧 Dismantled</Option>
+                  <Option value="dispatched">🚚 Dispatched</Option>
+                  <Option value="with_customer">👤 With Customer</Option>
+                  <Option value="pickup_pending">⏳ Pickup Pending</Option>
+                  <Option value="in_laundry">🧺 In Laundry</Option>
+                  <Option value="damaged">⚠️ Damaged</Option>
+                  <Option value="retired">🗑️ Retired</Option>
                 </Select>
               </Form.Item>
             </Col>
@@ -799,6 +813,16 @@ export default function InventoryManagementPage() {
                     <Option key={c} value={c}>{c.toUpperCase()}</Option>
                   ))}
                 </Select>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Bundle Built ID" name="bundleBuiltId">
+                <Input placeholder="Auto-filled when bundles are built" disabled />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Bag ID" name="bagMarking">
+                <Input placeholder="Auto-filled from warehouse manager" />
               </Form.Item>
             </Col>
             <Col span={24}>
