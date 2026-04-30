@@ -290,16 +290,16 @@ const AboutPage = () => {
             </div>
           </section>
 
-          {/* ── SECTION 7: USER STORIES (SARAH, MARCUS, ETC) ── */}
+          {/* ── SECTION 7: USER STORIES (INDIAN CUSTOMERS) ── */}
           <section className="py-32 bg-[#020617] text-white">
             <div className="max-w-7xl mx-auto px-6">
               <h2 className="text-4xl md:text-6xl font-bold tracking-tighter mb-20 text-center">Real Impact.</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                  {[
-                   { n: "Sarah Chen", r: "Corporate Lawyer, NY", q: "As a lawyer working 70-hour weeks, I was spending my precious weekends doing laundry. Closet Rush gave me my life back.", s: ["Time Saved: 8 hrs/week", "Member Since: 2024"] },
-                   { n: "Marcus Johnson", r: "Restaurant Owner", q: "Traditional services couldn't keep up with 50+ uniforms daily. Closet Rush handles it with same-day turnaround.", s: ["Cost Saved: 40%", "Business Plan"] },
-                   { n: "Priya Patel", r: "Mother of Three", q: "My son has severe allergies. Closet Rush's UV sanitization reduced his symptoms by 60%. I can't thank them enough.", s: ["Health Impact: High", "Family Plan"] },
-                   { n: "David Kim", r: "Fashion Designer", q: "Closet Rush's fabric-specific protocols preserve my samples perfectly. They understand textiles like no one else.", s: ["Specialty Fabrics", "Design Premium"] }
+                   { n: "Rahul Sharma", r: "Software Engineer, Gurgaon", q: "Working 12-hour shifts at my tech company, I had no time for laundry. ClosetRush's weekly bedding service means I always have fresh, clean sheets. My skin allergies have reduced significantly!", s: ["Time Saved: 6 hrs/week", "Member Since: 2024"] },
+                   { n: "Anjali Verma", r: "PG Owner, Noida", q: "Managing 25 rooms was a nightmare with bedding hygiene. ClosetRush handles all my bedsheets, pillow covers, and quilts with same-day pickup. My tenants are much happier now!", s: ["Cost Saved: 35%", "Business Plan"] },
+                   { n: "Priya Kapoor", r: "Working Mother, Delhi", q: "My daughter had constant dust allergies and skin rashes. After switching to ClosetRush's UV-sanitized bedding service, her symptoms reduced by 70%. Best decision ever!", s: ["Health Impact: High", "Family Plan"] },
+                   { n: "Vikram Singh", r: "Medical Student, AIIMS", q: "Living in a hostel, washing bedsheets was impossible. ClosetRush delivers fresh, hospital-grade clean bedding every week at just ₹10/day. Perfect for students like me!", s: ["Student Discount", "Monthly Plan"] }
                  ].map((user, i) => (
                     <div key={i} className="bg-white/5 border border-white/10 p-12 rounded-[50px] hover:bg-white/10 transition-all group">
                        <p className="text-2xl font-light italic text-slate-300 leading-relaxed mb-10 group-hover:text-white transition-colors">"{user.q}"</p>
@@ -329,10 +329,10 @@ const AboutPage = () => {
                       The Bigger <br/><span className="text-blue-600 italic">Vision.</span>
                    </h2>
                    <p className="text-2xl text-slate-500 max-w-3xl mx-auto font-light leading-relaxed mb-12">
-                      ClosetRush is building more than a service — we’re building awareness. Because your bed is where you spend 1/3rd of your life. And it deserves to be clean, safe, and healthy.
+                      ClosetRush is building more than a service — we’re building awareness. Because your bed and home is where you spend more than 1/3rd of your life. And it deserves to be clean, safe, and healthy.
                    </p>
                    <button onClick={handleGetStarted} className="px-16 py-8 bg-[#020617] text-white text-xl font-black rounded-full shadow-2xl hover:scale-105 transition-all">
-                      JOIN THE REST REVOLUTION
+                      JOIN THE HYGIENE REVOLUTION
                    </button>
                 </SmoothReveal>
              </div>
