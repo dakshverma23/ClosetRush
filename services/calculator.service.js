@@ -19,14 +19,14 @@ const DISCOUNT_TIERS = {
 };
 
 /**
- * Calculate fixed deposit
+ * Calculate security deposit
  * Formula: (singleBeds × 500) + (doubleBeds × 1000) + (curtainSets × 200)
  * 
  * @param {object} order - Order details
  * @param {number} order.singleBeds - Number of single beds
  * @param {number} order.doubleBeds - Number of double beds
  * @param {number} order.curtainSets - Number of curtain sets
- * @returns {number} Total fixed deposit amount
+ * @returns {number} Total security deposit amount
  * @throws {Error} If quantities are negative
  */
 const calculateFixedDeposit = (order) => {

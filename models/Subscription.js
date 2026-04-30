@@ -50,7 +50,7 @@ const subscriptionSchema = new mongoose.Schema({
   },
   fixedDeposit: {
     type: Number,
-    required: [true, 'Fixed deposit is required'],
+    required: [true, 'Security deposit is required'],
     min: 0
   },
   status: {

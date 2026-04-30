@@ -25,7 +25,7 @@ exports.createSubscriptionRequest = async (req, res, next) => {
     const discount = Math.round((subscriptionPrice * discountPercentage) / 100);
     const finalSubscriptionPrice = subscriptionPrice - discount;
 
-    // Calculate fixed deposit
+    // Calculate security deposit
     const fixedDeposit = 
       (bedConfiguration.singleBeds * 500) +
       (bedConfiguration.doubleBeds * 1000) +

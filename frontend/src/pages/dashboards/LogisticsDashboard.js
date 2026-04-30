@@ -153,6 +153,13 @@ const LogisticsDashboard = () => {
       title: 'Qty',
       key: 'qty',
       render: (_, o) => totalQty(o)
+    },
+    {
+      title: 'Bag ID',
+      key: 'bagId',
+      render: (_, o) => o.bagId
+        ? <Tag color="geekblue" style={{ fontWeight: 600 }}>{o.bagId}</Tag>
+        : <span className="text-gray-400">—</span>
     }
   ];
 

@@ -103,8 +103,53 @@ const subscriptionRequestSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  mobileNo: {
+    type: String,
+    trim: true
+  },
+  pincode: {
+    type: String,
+    trim: true
+  },
+  state: {
+    type: String,
+    trim: true
+  },
+  city: {
+    type: String,
+    trim: true
+  },
+  area: {
+    type: String,
+    trim: true
+  },
+  locality: {
+    type: String,
+    trim: true
+  },
+  buildingName: {
+    type: String,
+    trim: true
+  },
+  floor: {
+    type: String,
+    trim: true
+  },
+  roomNo: {
+    type: String,
+    trim: true
+  },
+  landmark: {
+    type: String,
+    trim: true
+  },
   preferredDeliveryDate: {
     type: Date
+  },
+  preferredDeliveryTime: {
+    type: String,
+    enum: ['morning', 'afternoon', 'evening'],
+    trim: true
   },
   specialInstructions: {
     type: String,

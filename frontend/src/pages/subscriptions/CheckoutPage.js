@@ -23,6 +23,49 @@ const CheckoutPage = () => {
   const [paymentMethod, setPaymentMethod] = useState('razorpay');
   const [form] = Form.useForm();
 
+  // Watch form values to auto-generate complete address
+  const formValues = Form.useWatch([], form);
+
+  useEffect(() => {
+    if (formValues) {
+      const {
+        buildingName,
+        floor,
+        roomNo,
+        locality,
+        area,
+        city,
+        state,
+        pincode,
+        landmark
+      } = formValues;
+
+      // Auto-generate complete address
+      const addressParts = [];
+      
+      if (buildingName) addressParts.push(buildingName);
+      if (floor && roomNo) {
+        addressParts.push(`Floor ${floor}, Room ${roomNo}`);
+      } else if (floor) {
+        addressParts.push(`Floor ${floor}`);
+      } else if (roomNo) {
+        addressParts.push(`Room ${roomNo}`);
+      }
+      if (locality) addressParts.push(locality);
+      if (area) addressParts.push(area);
+      if (city) addressParts.push(city);
+      if (state) addressParts.push(state);
+      if (pincode) addressParts.push(pincode);
+      if (landmark) addressParts.push(`(Near: ${landmark})`);
+
+      const completeAddress = addressParts.join(', ');
+      
+      if (completeAddress) {
+        form.setFieldsValue({ deliveryAddress: completeAddress });
+      }
+    }
+  }, [formValues, form]);
+
   useEffect(() => {
     // Load cart data from sessionStorage
     const storedCart = sessionStorage.getItem('checkoutCart');
@@ -54,15 +97,29 @@ const CheckoutPage = () => {
 
   const handleDeliveryDetailsSubmit = async (values) => {
     try {
+      // Prepare delivery details object with all fields
+      const deliveryDetails = {
+        deliveryAddress: values.deliveryAddress,
+        mobileNo: values.mobileNo,
+        pincode: values.pincode,
+        state: values.state,
+        city: values.city,
+        area: values.area,
+        locality: values.locality,
+        buildingName: values.buildingName,
+        floor: values.floor,
+        roomNo: values.roomNo,
+        landmark: values.landmark || '',
+        preferredDeliveryDate: values.preferredDeliveryDate?.toDate(),
+        preferredDeliveryTime: values.preferredDeliveryTime,
+        specialInstructions: values.specialInstructions || ''
+      };
+
       // Update delivery details for all requests
       const ids = requestIds.length > 0 ? requestIds : [requestId];
       await Promise.all(
         ids.map(id =>
-          api.patch(`/subscription-requests/${id}/delivery`, {
-            deliveryAddress: values.deliveryAddress,
-            preferredDeliveryDate: values.preferredDeliveryDate?.toDate(),
-            specialInstructions: values.specialInstructions
-          })
+          api.patch(`/subscription-requests/${id}/delivery`, deliveryDetails)
         )
       );
       setCurrentStep(1);
@@ -112,10 +169,18 @@ const CheckoutPage = () => {
   };
 
   // Calculate total amount to display on Pay button
+  const GST_RATE = 0.18;
+
+  const getGstAmount = () => {
+    const base = cart?.summary?.finalPrice ?? request?.finalSubscriptionPrice ?? 0;
+    return Math.round(base * GST_RATE);
+  };
+
   const getTotalAmount = () => {
-    if (cart?.summary?.totalAmount) return cart.summary.totalAmount;
-    if (request?.totalAmount) return request.totalAmount;
-    return 0;
+    const base = cart?.summary?.finalPrice ?? request?.finalSubscriptionPrice ?? 0;
+    const deposit = cart?.summary?.fixedDeposit ?? request?.fixedDeposit ?? 0;
+    const gst = Math.round(base * GST_RATE);
+    return base + gst + deposit;
   };
 
   if (loading) {
@@ -205,16 +270,20 @@ const CheckoutPage = () => {
                 <span>-₹{cart.summary.discount}</span>
               </div>
             )}
-            <div className="flex justify-between text-sm font-semibold">
-              <span>After Discount</span>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">Subtotal (after discount)</span>
               <span>₹{cart.summary.finalPrice}</span>
+            </div>
+            <div className="flex justify-between text-sm text-orange-600">
+              <span>GST (18%)</span>
+              <span>+₹{Math.round(cart.summary.finalPrice * GST_RATE)}</span>
             </div>
 
             <Divider className="my-2" />
 
             <div className="flex justify-between text-sm items-start">
               <div>
-                <div className="text-gray-600">Fixed Deposit</div>
+                <div className="text-gray-600">Security Deposit</div>
                 <div className="text-xs text-green-600 flex items-center gap-1 mt-0.5">
                   <SafetyOutlined /> 100% Refundable
                 </div>
@@ -228,8 +297,13 @@ const CheckoutPage = () => {
             <Divider className="my-2" />
 
             <div className="flex justify-between items-center text-lg">
-              <span className="font-bold">Total Amount</span>
-              <span className="font-bold text-blue-600">₹{cart.summary.totalAmount}</span>
+              <span className="font-bold">Total Payable</span>
+              <span className="font-bold text-blue-600">
+                ₹{cart.summary.finalPrice + Math.round(cart.summary.finalPrice * GST_RATE) + cart.summary.fixedDeposit}
+              </span>
+            </div>
+            <div className="text-xs text-gray-400 text-right">
+              (incl. GST + refundable deposit)
             </div>
           </div>
         </div>
@@ -237,6 +311,7 @@ const CheckoutPage = () => {
     }
 
     // Fallback: single request summary (old behaviour)
+    const gst = Math.round((request.finalSubscriptionPrice || 0) * GST_RATE);
     return (
       <div className="space-y-3">
         <div>
@@ -248,26 +323,30 @@ const CheckoutPage = () => {
 
         <Divider className="my-3" />
 
-        <div className="flex justify-between">
+        <div className="flex justify-between text-sm">
           <span className="text-gray-600">Subscription Price</span>
           <span>₹{request.subscriptionPrice}</span>
         </div>
         {request.discount > 0 && (
-          <div className="flex justify-between text-green-600">
+          <div className="flex justify-between text-sm text-green-600">
             <span>Discount ({request.discountPercentage}%)</span>
             <span>-₹{request.discount}</span>
           </div>
         )}
-        <div className="flex justify-between">
-          <span className="text-gray-600">Subscription Total</span>
-          <span className="font-semibold">₹{request.finalSubscriptionPrice}</span>
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-600">Subtotal (after discount)</span>
+          <span>₹{request.finalSubscriptionPrice}</span>
+        </div>
+        <div className="flex justify-between text-sm text-orange-600">
+          <span>GST (18%)</span>
+          <span>+₹{gst}</span>
         </div>
 
         <Divider className="my-3" />
 
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center text-sm">
           <div>
-            <div className="text-gray-600">Fixed Deposit</div>
+            <div className="text-gray-600">Security Deposit</div>
             <div className="text-xs text-green-600 flex items-center gap-1">
               <SafetyOutlined /> 100% Refundable
             </div>
@@ -278,8 +357,13 @@ const CheckoutPage = () => {
         <Divider className="my-3" />
 
         <div className="flex justify-between items-center text-lg">
-          <span className="font-bold">Total Amount</span>
-          <span className="font-bold text-blue-600">₹{request.totalAmount}</span>
+          <span className="font-bold">Total Payable</span>
+          <span className="font-bold text-blue-600">
+            ₹{(request.finalSubscriptionPrice || 0) + gst + (request.fixedDeposit || 0)}
+          </span>
+        </div>
+        <div className="text-xs text-gray-400 text-right">
+          (incl. GST + refundable deposit)
         </div>
       </div>
     );
@@ -319,32 +403,191 @@ const CheckoutPage = () => {
                       specialInstructions: request.specialInstructions
                     }}
                   >
+                    {/* Contact Information */}
+                    <div className="bg-blue-50 p-3 rounded-lg mb-4">
+                      <div className="font-semibold text-sm mb-3 text-gray-700">Contact Information</div>
+                      <Row gutter={16}>
+                        <Col xs={24} sm={12}>
+                          <Form.Item
+                            name="mobileNo"
+                            label="Mobile Number"
+                            rules={[
+                              { required: true, message: 'Please enter mobile number' },
+                              { pattern: /^[0-9]{10}$/, message: 'Enter valid 10-digit mobile number' }
+                            ]}
+                          >
+                            <Input placeholder="10-digit mobile number" maxLength={10} />
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={12}>
+                          <Form.Item
+                            name="pincode"
+                            label="Pincode"
+                            rules={[
+                              { required: true, message: 'Please enter pincode' },
+                              { pattern: /^[0-9]{6}$/, message: 'Enter valid 6-digit pincode' }
+                            ]}
+                          >
+                            <Input placeholder="6-digit pincode" maxLength={6} />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    </div>
+
+                    {/* Address Details */}
+                    <div className="bg-gray-50 p-3 rounded-lg mb-4">
+                      <div className="font-semibold text-sm mb-3 text-gray-700">Address Details</div>
+                      <Row gutter={16}>
+                        <Col xs={24} sm={12}>
+                          <Form.Item
+                            name="state"
+                            label="State"
+                            rules={[{ required: true, message: 'Please enter state' }]}
+                          >
+                            <Input placeholder="e.g., Maharashtra" />
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={12}>
+                          <Form.Item
+                            name="city"
+                            label="City"
+                            rules={[{ required: true, message: 'Please enter city' }]}
+                          >
+                            <Input placeholder="e.g., Mumbai" />
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={12}>
+                          <Form.Item
+                            name="area"
+                            label="Area"
+                            rules={[{ required: true, message: 'Please enter area' }]}
+                          >
+                            <Input placeholder="e.g., Andheri West" />
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={12}>
+                          <Form.Item
+                            name="locality"
+                            label="Locality"
+                            rules={[{ required: true, message: 'Please enter locality' }]}
+                          >
+                            <Input placeholder="e.g., Lokhandwala Complex" />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    </div>
+
+                    {/* Building Details */}
+                    <div className="bg-green-50 p-3 rounded-lg mb-4">
+                      <div className="font-semibold text-sm mb-3 text-gray-700">Building Details</div>
+                      <Row gutter={16}>
+                        <Col xs={24}>
+                          <Form.Item
+                            name="buildingName"
+                            label="Building Name / House Number"
+                            rules={[{ required: true, message: 'Please enter building name or house number' }]}
+                          >
+                            <Input placeholder="e.g., Sunrise Apartments or House No. 123" />
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={12}>
+                          <Form.Item
+                            name="floor"
+                            label="Floor Number"
+                            rules={[{ required: true, message: 'Please enter floor number' }]}
+                          >
+                            <Input placeholder="e.g., 3rd Floor or Ground Floor" />
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={12}>
+                          <Form.Item
+                            name="roomNo"
+                            label="Flat / Room Number"
+                            rules={[{ required: true, message: 'Please enter flat/room number' }]}
+                          >
+                            <Input placeholder="e.g., 304 or A-12" />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    </div>
+
+                    {/* Landmark (Optional) */}
                     <Form.Item
-                      name="deliveryAddress"
-                      label="Delivery Address"
-                      rules={[{ required: true, message: 'Please enter delivery address' }]}
+                      name="landmark"
+                      label="Landmark (Optional)"
                     >
-                      <TextArea rows={3} placeholder="Enter complete delivery address" />
+                      <Input placeholder="e.g., Near City Mall, Opposite Park" />
                     </Form.Item>
 
+                    {/* Complete Address Preview */}
                     <Form.Item
-                      name="preferredDeliveryDate"
-                      label="Preferred Delivery Date"
-                      rules={[{ required: true, message: 'Please select preferred delivery date' }]}
+                      name="deliveryAddress"
+                      label="Complete Address (Auto-generated)"
+                      tooltip="This will be auto-filled based on above details"
                     >
-                      <DatePicker
-                        className="w-full"
-                        disabledDate={(current) => current && current < moment().add(2, 'days')}
-                        format="DD/MM/YYYY"
+                      <TextArea 
+                        rows={3} 
+                        placeholder="Complete address will be generated automatically" 
+                        disabled
+                        className="bg-gray-100"
                       />
                     </Form.Item>
 
+                    {/* Delivery Preferences */}
+                    <Divider>Delivery Preferences</Divider>
+
+                    <Row gutter={16}>
+                      <Col xs={24} sm={12}>
+                        <Form.Item
+                          name="preferredDeliveryDate"
+                          label="Preferred Delivery Date"
+                          rules={[{ required: true, message: 'Please select preferred delivery date' }]}
+                        >
+                          <DatePicker
+                            className="w-full"
+                            disabledDate={(current) => current && current < moment().add(2, 'days')}
+                            format="DD/MM/YYYY"
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} sm={12}>
+                        <Form.Item
+                          name="preferredDeliveryTime"
+                          label="Preferred Delivery Time"
+                          rules={[{ required: true, message: 'Please select preferred time' }]}
+                        >
+                          <Radio.Group className="w-full">
+                            <Radio.Button value="morning" className="w-1/3 text-center">
+                              Morning<br/><span className="text-xs text-gray-500">9AM-12PM</span>
+                            </Radio.Button>
+                            <Radio.Button value="afternoon" className="w-1/3 text-center">
+                              Afternoon<br/><span className="text-xs text-gray-500">12PM-4PM</span>
+                            </Radio.Button>
+                            <Radio.Button value="evening" className="w-1/3 text-center">
+                              Evening<br/><span className="text-xs text-gray-500">4PM-8PM</span>
+                            </Radio.Button>
+                          </Radio.Group>
+                        </Form.Item>
+                      </Col>
+                    </Row>
+
                     <Form.Item
                       name="specialInstructions"
-                      label="Special Instructions (Optional)"
+                      label="Special Delivery Instructions (Optional)"
                     >
-                      <TextArea rows={2} placeholder="Any special delivery instructions?" />
+                      <TextArea 
+                        rows={2} 
+                        placeholder="e.g., Call before arriving, Ring doorbell twice, Security gate code, etc." 
+                      />
                     </Form.Item>
+
+                    <Alert
+                      message="Delivery Information"
+                      description="Our delivery partner will contact you 30 minutes before delivery. Please ensure someone is available to receive the items."
+                      type="info"
+                      showIcon
+                      className="mb-4"
+                    />
 
                     <Form.Item>
                       <Button type="primary" htmlType="submit" size="large" block>

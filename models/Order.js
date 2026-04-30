@@ -17,15 +17,11 @@ const orderedBundleSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
-// Sub-schema: a physical bundle assembled by the pickup member
+// Sub-schema: a physical bundle assembled by the warehouse manager
 const builtBundleSchema = new mongoose.Schema({
   bundleId: {
     type: String,
     required: [true, 'Bundle ID is required']   // e.g. CR-1718000000000-0001
-  },
-  bagId: {
-    type: String,
-    required: [true, 'Bag ID is required']
   },
   skuCodes: [{ type: String, uppercase: true }]
 }, { _id: false });
@@ -75,6 +71,11 @@ const orderSchema = new mongoose.Schema({
     type: String,
     enum: ['standard', 'renewal'],
     default: 'standard'
+  },
+  bagId: {
+    type: String,
+    trim: true,
+    default: null   // set by warehouse manager when packing the order
   },
   deliveryForm: {
     type: deliveryFormSchema,

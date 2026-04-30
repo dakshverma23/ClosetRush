@@ -120,7 +120,13 @@ const buildBundles = async (req, res, next) => {
       throw ApiError.forbidden('You are not assigned to this order');
     }
 
-    const { bundles } = req.body;
+    const { bundles, bagId } = req.body;
+
+    // bagId is order-level — required
+    if (!bagId || typeof bagId !== 'string' || bagId.trim() === '') {
+      throw ApiError.badRequest('bagId is required for the order');
+    }
+
     if (!bundles || !Array.isArray(bundles) || bundles.length === 0) {
       throw ApiError.badRequest('bundles must be a non-empty array');
     }
@@ -128,9 +134,6 @@ const buildBundles = async (req, res, next) => {
     for (const bundle of bundles) {
       if (!bundle.skuCodes || !Array.isArray(bundle.skuCodes) || bundle.skuCodes.length === 0) {
         throw ApiError.badRequest('Each bundle must have a non-empty skuCodes array');
-      }
-      if (!bundle.bagId || typeof bundle.bagId !== 'string' || bundle.bagId.trim() === '') {
-        throw ApiError.badRequest('Each bundle must have a non-empty bagId');
       }
       for (const skuCode of bundle.skuCodes) {
         const item = await InventoryItem.findOne({ skuCode: skuCode.toUpperCase() });
@@ -142,15 +145,15 @@ const buildBundles = async (req, res, next) => {
 
     const builtBundles = bundles.map((b, index) => ({
       bundleId: generateBundleId(index + 1),
-      bagId: b.bagId,
       skuCodes: b.skuCodes.map(s => s.toUpperCase())
     }));
 
     order.builtBundles = builtBundles;
+    order.bagId = bagId.trim();
     order.status = 'packed';
     await order.save();
 
-    // ── Auto-sync inventory items from built bundles ──────────────────────
+    // ── Auto-sync inventory items — write bundleBuiltId and bagMarking ────
     for (const bundle of builtBundles) {
       for (const skuCode of bundle.skuCodes) {
         await InventoryItem.findOneAndUpdate(
@@ -158,7 +161,7 @@ const buildBundles = async (req, res, next) => {
           {
             $set: {
               bundleBuiltId: bundle.bundleId,
-              bagMarking: bundle.bagId,
+              bagMarking: bagId.trim(),   // order-level bag ID
               orderId: order._id,
               status: 'in_stock',
               dispatchDate: null
@@ -206,8 +209,9 @@ const markReadyForPickup = async (req, res, next) => {
 };
 
 /**
- * Assign a ready-for-pickup order to a logistics partner (admin)
+ * Assign a ready-for-pickup order to a logistics partner (admin or warehouse manager)
  * POST /api/orders/:id/assign-logistics
+ * POST /api/orders/:id/assign-logistics-wh
  */
 const assignLogisticsPartner = async (req, res, next) => {
   try {
@@ -215,6 +219,13 @@ const assignLogisticsPartner = async (req, res, next) => {
     if (!order) throw ApiError.notFound('Order not found', 'ORDER_NOT_FOUND');
 
     guardTransition(order, 'ready_for_pickup');
+
+    // Warehouse manager can only assign logistics for orders assigned to them
+    if (req.user.userType === 'warehouse_manager') {
+      if (order.assignedWarehouseManagerId?.toString() !== req.user._id.toString()) {
+        throw ApiError.forbidden('You are not assigned to this order');
+      }
+    }
 
     const { logisticsPartnerId } = req.body;
     const user = await User.findById(logisticsPartnerId);
@@ -228,7 +239,6 @@ const assignLogisticsPartner = async (req, res, next) => {
     order.status = 'assigned_to_logistics';
     await order.save();
 
-    // Populate builtBundles for the notification message
     await order.populate('userId', 'name address');
     await notifyLogisticsAssigned(logisticsPartnerId, order);
 

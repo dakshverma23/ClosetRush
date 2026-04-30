@@ -3,7 +3,7 @@ const Bundle = require('../models/Bundle');
 const ApiError = require('../utils/apiError');
 
 /**
- * Calculate fixed deposit
+ * Calculate security deposit
  * POST /api/calculate/deposit
  */
 const calculateDeposit = async (req, res, next) => {

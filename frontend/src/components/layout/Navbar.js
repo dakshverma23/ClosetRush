@@ -49,12 +49,17 @@ const Navbar = () => {
 
   const signUpPath = () => {
     if (!isAuthenticated()) return '/register';
-    return user?.userType === 'business' ? '/business/subscriptions' : '/subscriptions';
+    if (user?.userType === 'business') return '/business/subscriptions';
+    if (user?.userType === 'warehouse_manager') return '/warehouse/dashboard';
+    if (user?.userType === 'logistics_partner') return '/logistics/dashboard';
+    return '/subscriptions';
   };
 
   const dashboardPath = () => {
     if (user?.userType === 'admin') return '/admin/dashboard';
     if (user?.userType === 'business') return '/business/dashboard';
+    if (user?.userType === 'warehouse_manager') return '/warehouse/dashboard';
+    if (user?.userType === 'logistics_partner') return '/logistics/dashboard';
     return '/dashboard';
   };
 

@@ -57,6 +57,9 @@ import StaffApprovalsPage from './pages/admin/StaffApprovalsPage';
 // Import pickup member pages
 import SubmitPickupReport from './pages/pickup/SubmitPickupReport';
 
+// Import warehouse pages
+import QualityCheckPage from './pages/warehouse/QualityCheckPage';
+
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const { isAuthenticated, user } = useAuth();
@@ -291,6 +294,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={['warehouse_manager']}>
             <SubmitPickupReport />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/warehouse/quality-check" 
+        element={
+          <ProtectedRoute allowedRoles={['warehouse_manager']}>
+            <QualityCheckPage />
           </ProtectedRoute>
         } 
       />

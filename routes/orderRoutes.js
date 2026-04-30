@@ -20,6 +20,9 @@ router.patch('/:id/ready-for-pickup', authenticate, requireWarehouseManager, ctr
 // POST /api/orders/:id/assign-logistics — admin only
 router.post('/:id/assign-logistics', authenticate, requireAdmin, ctrl.assignLogisticsPartner);
 
+// POST /api/orders/:id/assign-logistics-wh — warehouse manager can also assign logistics
+router.post('/:id/assign-logistics-wh', authenticate, requireWarehouseManager, ctrl.assignLogisticsPartner);
+
 // PATCH /api/orders/:id/out-for-delivery — logistics partner only
 router.patch('/:id/out-for-delivery', authenticate, requireLogisticsPartner, ctrl.markOutForDelivery);
 

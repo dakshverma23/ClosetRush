@@ -1,9 +1,11 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { CheckOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 // Card: alternating blue/white — even index = blue, odd = white
-function PricingCard({ t, index, compact = false }) {
+function PricingCard({ t, index, compact = false, onChoose }) {
   const isBlue = index % 2 === 0;
   const p = compact ? "p-4" : "p-6";
 
@@ -116,6 +118,7 @@ function PricingCard({ t, index, compact = false }) {
           }}
           whileHover={{ scale: 1.02, background: isBlue ? "rgba(255,255,255,0.25)" : undefined }}
           whileTap={{ scale: 0.97 }}
+          onClick={() => onChoose(t)}
         >
           Choose {t.label}
         </motion.button>
@@ -127,6 +130,25 @@ function PricingCard({ t, index, compact = false }) {
 export default function PricingSection() {
   const [visiblePair, setVisiblePair] = useState(0);
   const [direction, setDirection] = useState(1); // 1 = forward, -1 = back
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
+
+  const handleChoosePlan = (tier) => {
+    if (isAuthenticated()) {
+      // Navigate to appropriate subscription page based on user type
+      if (user?.userType === 'business') {
+        navigate('/subscriptions/business');
+      } else if (user?.userType === 'individual') {
+        navigate('/subscriptions/individual');
+      } else {
+        // Default to individual subscription page
+        navigate('/subscriptions/individual');
+      }
+    } else {
+      // Not logged in, redirect to login page
+      navigate('/login');
+    }
+  };
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -144,25 +166,25 @@ export default function PricingSection() {
   const tiers = [
     {
       label: "Starter", duration: "1 Month",
-      price: 300, original: null, discount: null,
+      price: " 300**", original: null, discount: null,
       features: ["All bundle features", "Free delivery & pickup", "Flexible scheduling", "Customer support", "24/7 tracking"],
       popular: false
     },
     {
       label: "Growth", duration: "3 Months",
-      price: 855, original: 900, discount: "5% off",
+      price: "855**", original: 900, discount: "5% off",
       features: ["Everything in Starter", "Priority support", "Flexible rescheduling", "Quality guarantee", "Express processing"],
       popular: false
     },
     {
       label: "Professional", duration: "6 Months",
-      price: 1620, original: 1800, discount: "10% off",
+      price: "1620**", original: 1800, discount: "10% off",
       features: ["Everything in Growth", "Premium customer care", "Express delivery", "Damage protection", "Free emergency service"],
       popular: true
     },
     {
       label: "Enterprise", duration: "12 Months",
-      price: 2880, original: 3600, discount: "20% off",
+      price: "2880**", original: 3600, discount: "20% off",
       features: ["Everything in Professional", "Dedicated account manager", "Same-day delivery", "Free replacements", "VIP status"],
       popular: false
     }
@@ -238,7 +260,7 @@ export default function PricingSection() {
               transition={{ duration: 0.55, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
               viewport={{ once: true }}
             >
-              <PricingCard t={t} index={i} />
+              <PricingCard t={t} index={i} onChoose={handleChoosePlan} />
             </motion.div>
           ))}
         </div>
@@ -266,7 +288,7 @@ export default function PricingSection() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.4, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <PricingCard t={t} index={baseIndex + i} compact />
+                  <PricingCard t={t} index={baseIndex + i} compact onChoose={handleChoosePlan} />
                 </motion.div>
               ))}
             </motion.div>

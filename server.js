@@ -65,9 +65,6 @@ app.use('/api/inventory-management', require('./routes/inventoryManagement'));
 app.use('/api/pickup-members', require('./routes/warehouseManagerRoutes'));  // backward-compat alias
 app.use('/api/warehouse-managers', require('./routes/warehouseManagerRoutes'));
 app.use('/api/logistics-partners', require('./routes/logisticsPartnerRoutes'));
-// Backward-compat alias: proxy /api/pickup-members to /api/warehouse-managers
-app.use('/api/pickup-members', require('./routes/warehouseManagerRoutes'));
-app.use('/api/logistics-partners', require('./routes/logisticsPartnerRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/quality-checks', require('./routes/qualityCheckRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));

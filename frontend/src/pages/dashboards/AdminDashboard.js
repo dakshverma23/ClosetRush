@@ -481,9 +481,9 @@ const AdminDashboard = () => {
     });
   };
 
-  const handleToggleBundleStatus = async (id) => {
+  const handleToggleBundleStatus = async (id, currentStatus) => {
     try {
-      await api.patch(`/bundles/${id}/toggle-status`);
+      await api.patch(`/bundles/${id}/status`, { active: !currentStatus });
       appMessage.success('Bundle status updated');
       fetchDashboardData();
     } catch (error) {
@@ -869,7 +869,7 @@ const AdminDashboard = () => {
           </Button>
           <Button
             size="small"
-            onClick={() => handleToggleBundleStatus(record._id)}
+            onClick={() => handleToggleBundleStatus(record._id, record.active)}
           >
             {record.active ? 'Deactivate' : 'Activate'}
           </Button>
@@ -1235,7 +1235,7 @@ const AdminDashboard = () => {
         onClose={() => setMobileDrawerVisible(false)}
         open={mobileDrawerVisible}
         width={280}
-        bodyStyle={{ padding: 0 }}
+        styles={{ body: { padding: 0 } }}
       >
         {sidebarMenu}
       </Drawer>
@@ -2056,6 +2056,13 @@ const AdminDashboard = () => {
                             title: 'Warehouse Manager',
                             key: 'wm',
                             render: (_, o) => o.assignedWarehouseManagerId?.name || shortId(o.assignedWarehouseManagerId) || '—'
+                          },
+                          {
+                            title: 'Bag ID',
+                            key: 'bagId',
+                            render: (_, o) => o.bagId
+                              ? <Tag color="geekblue" style={{ fontWeight: 600 }}>{o.bagId}</Tag>
+                              : <span className="text-slate-400">—</span>
                           },
                           {
                             title: 'Action',

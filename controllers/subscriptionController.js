@@ -130,7 +130,7 @@ const createSubscription = async (req, res, next) => {
     // Calculate pricing
     const pricing = calculateBundlePricing(bundle, duration);
 
-    // Calculate fixed deposit based on bundle
+    // Calculate security deposit based on bundle
     const fixedDeposit = bundle.depositAmount || 0;
 
     // Create subscription

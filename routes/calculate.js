@@ -4,7 +4,7 @@ const calculateController = require('../controllers/calculateController');
 
 /**
  * @route   POST /api/calculate/deposit
- * @desc    Calculate fixed deposit
+ * @desc    Calculate security deposit
  * @access  Public
  */
 router.post('/deposit', calculateController.calculateDeposit);

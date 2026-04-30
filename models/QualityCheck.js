@@ -1,5 +1,11 @@
 const mongoose = require('mongoose');
 
+// Per-SKU photo entry
+const skuPhotoSchema = new mongoose.Schema({
+  skuCode: { type: String, trim: true, uppercase: true, required: true },
+  photos: [{ type: String }]   // Cloudinary URLs
+}, { _id: false });
+
 const qualityCheckSchema = new mongoose.Schema({
   // ── Links ─────────────────────────────────────────────────────────────────
   orderId: {
@@ -21,9 +27,11 @@ const qualityCheckSchema = new mongoose.Schema({
   },
 
   // ── Bundle details ────────────────────────────────────────────────────────
-  bundleSummary: { type: String, trim: true },   // e.g. "2x Bedroom Bundle"
-  bagIds: [{ type: String, trim: true }],
-  skuCodes: [{ type: String, trim: true, uppercase: true }],
+  bundleSummary: { type: String, trim: true },
+  bagId: { type: String, trim: true },
+
+  // ── Per-SKU photos (new structure) ────────────────────────────────────────
+  skuPhotos: [skuPhotoSchema],   // one entry per SKU with its photos
 
   // ── Quality notes ─────────────────────────────────────────────────────────
   notes: { type: String, trim: true },
@@ -33,7 +41,7 @@ const qualityCheckSchema = new mongoose.Schema({
     default: 'good'
   },
 
-  // ── Photo evidence (Cloudinary URLs) ─────────────────────────────────────
+  // ── Legacy flat image list (kept for backward compat) ─────────────────────
   images: [{ type: String }],
 
   // ── Admin review ──────────────────────────────────────────────────────────

@@ -675,7 +675,7 @@ const IndividualSubscriptionPage = () => {
                       <Divider className="my-3" />
                       <div className="flex justify-between items-center">
                         <div>
-                          <div className="text-gray-600">Fixed Deposit</div>
+                          <div className="text-gray-600">Security Deposit</div>
                           <div className="text-xs text-green-600 flex items-center gap-1">
                             <CheckCircleOutlined /> 100% Refundable
                           </div>

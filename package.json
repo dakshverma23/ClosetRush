@@ -9,7 +9,8 @@
     "test": "jest --coverage",
     "seed:bundles": "node scripts/seedBundles.js",
     "seed:test": "node scripts/seedTestData.js",
-    "create:admin": "node scripts/createAdmin.js"
+    "create:admin": "node scripts/createAdmin.js",
+    "cleanup:bundles": "node scripts/cleanupBundles.js"
   },
   "keywords": [
     "subscription",

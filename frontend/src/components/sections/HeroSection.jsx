@@ -75,7 +75,7 @@ export default function HeroSection() {
                     WebkitTextFillColor: "transparent",
                   }}
                 >
-                  just ₹10
+                  just ₹10**
                 </span>
 
                 {/* "per day." — light, airy */}
@@ -98,7 +98,7 @@ export default function HeroSection() {
                     fontWeight: 600,
                     letterSpacing: "0.22em",
                     textTransform: "uppercase",
-                    color: "#5a8fc7",
+                    color: "#021d3bff",
                   }}
                 >
                   with ClosetRush
@@ -154,7 +154,6 @@ export default function HeroSection() {
               transition={{ duration: 0.7, delay: 0.6 }}
             >
               {[
-                { icon: "⭐", label: "4.9/5", sub: "Rating" },
                 { icon: "🚚", label: "Free", sub: "Delivery" },
                 { icon: "🔄", label: "Cancel", sub: "Anytime" },
               ].map((item, i) => (
