@@ -75,7 +75,16 @@ export default function HeroSection() {
                     WebkitTextFillColor: "transparent",
                   }}
                 >
-                  just ₹10**
+                  just ₹10
+                  <span
+                    style={{
+                      fontSize: "clamp(2rem, 2vw, 1.2rem)",
+                      verticalAlign: "super",
+                      marginLeft: "3px",
+                    }}
+                  >
+                    **
+                  </span>
                 </span>
 
                 {/* "per day." — light, airy */}

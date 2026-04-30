@@ -98,15 +98,18 @@ const AboutPage = () => {
                     <h2 className="text-4xl md:text-6xl font-bold text-slate-900 mb-8 tracking-tighter">
                       The "Invisible" <br/><span className="text-blue-600">Health Threat.</span>
                     </h2>
-                    <p className="text-xl text-slate-600 mb-10 leading-relaxed">
-                      Studies show that bedsheets, pillow covers, and blankets can accumulate bacteria, fungi, sweat, dead skin cells, and dust mites within just a few days. When not washed regularly, this can lead to:
+                    <p className="text-xl text-slate-600 mb-6 leading-relaxed">
+                      Medical research reveals that unwashed bedsheets, pillow covers, quilts, and blankets become breeding grounds for harmful microorganisms. Within just 7 days, your bedding can accumulate millions of bacteria, dust mites, fungi, dead skin cells, body oils, and sweat residue.
+                    </p>
+                    <p className="text-lg text-slate-600 mb-10 leading-relaxed">
+                      Regular professional laundry service and proper bedding hygiene are essential for preventing serious health issues. When bedsheets and pillow covers aren't washed frequently with proper sanitization, this can lead to:
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6">
                        {[
-                         { t: "Skin infections & acne", d: "Microbial buildup triggers breakouts." },
-                         { t: "Allergies & respiratory", d: "Dust mites trigger asthma & sinus." },
-                         { t: "Dandruff & hair fall", d: "Fungal growth on pillow covers." },
-                         { t: "Ear & scalp infections", d: "Due to unchecked microbial growth." }
+                         { t: "Skin infections & acne breakouts", d: "Bacterial buildup from unwashed bedsheets triggers severe acne, eczema, and dermatitis." },
+                         { t: "Allergies & respiratory problems", d: "Dust mites in dirty bedding cause asthma attacks, allergic rhinitis, and chronic sinus infections." },
+                         { t: "Dandruff & hair fall issues", d: "Fungal growth on unwashed pillow covers leads to scalp infections and excessive hair loss." },
+                         { t: "Ear & scalp infections", d: "Prolonged exposure to bacteria on dirty pillows causes painful ear infections and scalp irritation." }
                        ].map((item, i) => (
                          <div key={i} className="flex gap-4 group">
                             <div className="w-1 bg-slate-200 group-hover:bg-blue-600 transition-colors" />
@@ -117,15 +120,26 @@ const AboutPage = () => {
                          </div>
                        ))}
                     </div>
+                    <div className="mt-8 p-6 bg-red-50 rounded-2xl border border-red-100">
+                      <p className="text-sm font-bold text-red-900 mb-2">⚠️ Health Alert:</p>
+                      <p className="text-sm text-red-700">Studies show that bedsheets harbor more bacteria than toilet seats after just one week of use. Professional laundry services with good sanitization are crucial for maintaining bedding hygiene.</p>
+                    </div>
                   </SmoothReveal>
                 </Col>
                 <Col xs={24} lg={12}>
                    <SmoothReveal y={40} delay={0.2}>
                       <div className="relative rounded-[60px] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)]">
-                         <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80" className="w-full aspect-[4/5] object-cover" alt="Bacteria" />
+                         <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80" className="w-full aspect-[4/5] object-cover" alt="Bacteria on unwashed bedding" />
                          <div className="absolute inset-0 bg-blue-600/10 mix-blend-multiply" />
                          <div className="absolute bottom-10 left-10 right-10 bg-white/90 backdrop-blur-xl p-8 rounded-3xl border border-white/20">
-                            <p className="text-slate-900 font-bold leading-tight">Despite this, most people in PGs and hostels neglect bedding hygiene due to lack of access.</p>
+                            <p className="text-slate-900 font-bold leading-tight mb-3">Despite knowing the health risks, most people in PGs, hostels, and rental apartments neglect regular bedding hygiene and laundry due to:</p>
+                            <ul className="text-slate-900 font-semibold leading-relaxed space-y-2 list-disc list-inside">
+                              <li>Lack of awareness about bedding hygiene importance</li>
+                              <li>Lack of time for regular laundry and washing</li>
+                              <li>Lack of proper washing facilities and equipment</li>
+                              <li>Lack of hygiene consciousness and health education</li>
+                            </ul>
+                            <p className="text-xs text-slate-600 mt-4 italic">Professional bedding laundry services solve all these problems with convenient doorstep pickup and delivery.</p>
                          </div>
                       </div>
                    </SmoothReveal>
@@ -148,7 +162,7 @@ const AboutPage = () => {
                        <HeartOutlined className="text-3xl" />
                     </div>
                     <p className="text-2xl md:text-4xl text-slate-800 font-light leading-snug italic text-center">
-                      "One of our close friends, <span className="font-bold text-blue-600 text-not-italic">Harshit</span>, started facing ear infections and scalp irritation. Later, doctors pointed out that prolonged exposure to bacteria and moisture on unwashed bedding was the trigger."
+                     <span className="font-bold text-blue-600 text-not-italic">Harshit</span>, started facing ear infections and scalp irritation. Later, doctors pointed out that prolonged exposure to bacteria and moisture on unwashed bedding was the trigger."
                     </p>
                     <div className="mt-12 flex flex-wrap justify-center gap-4">
                        <Tag color="red" className="rounded-full px-6 py-2 font-bold uppercase text-[10px]">Sweat during sleep</Tag>
@@ -202,37 +216,39 @@ const AboutPage = () => {
                 <div className="md:col-span-2 md:row-span-2 bg-white p-12 rounded-[50px] border border-slate-200 shadow-sm flex flex-col justify-between group hover:border-blue-500 transition-all">
                   <div>
                     <Tag color="blue" className="mb-6 font-bold uppercase tracking-widest">Our Solution</Tag>
-                    <h3 className="text-4xl font-bold text-slate-900 mb-6 leading-tight">Fresh, professionally cleaned bedding.</h3>
+                    <h3 className="text-4xl font-bold text-slate-900 mb-6 leading-tight">Fresh, professionally cleaned bedding with better hygiene.</h3>
+                    <p className="text-slate-600 mb-6 leading-relaxed">ClosetRush provides premium bedding laundry services with doorstep pickup and delivery. Our professional washing process ensures cleanliness for your bedsheets, pillow covers, quilts, blankets, and curtains.</p>
                     <ul className="space-y-4 text-slate-500 text-lg">
-                       <li className="flex gap-3 items-center"><CheckCircleFilled className="text-blue-500" /> Regular replacement cycles</li>
-                       <li className="flex gap-3 items-center"><CheckCircleFilled className="text-blue-500" /> Hygienic medical-grade standards</li>
-                       <li className="flex gap-3 items-center"><CheckCircleFilled className="text-blue-500" /> Easy doorstep delivery & pickup</li>
+                       <li className="flex gap-3 items-start"><CheckCircleFilled className="text-blue-500 mt-1" /> <span><strong>Regular replacement cycles:</strong> To maintain optimal hygiene</span></li>
+                       <li className="flex gap-3 items-start"><CheckCircleFilled className="text-blue-500 mt-1" /> <span><strong>Medical-grade sanitization:</strong> UV-C sterilization and eco-friendly detergents eliminate 99.9% bacteria</span></li>
+                       <li className="flex gap-3 items-start"><CheckCircleFilled className="text-blue-500 mt-1" /> <span><strong>Doorstep service:</strong> Convenient pickup and delivery at your home, hostel, or PG accommodation</span></li>
+                       <li className="flex gap-3 items-start"><CheckCircleFilled className="text-blue-500 mt-1" /> <span><strong>Affordable pricing:</strong> Starting at just ₹10** per day for complete bedding hygiene solution</span></li>
                     </ul>
                   </div>
                   <div className="mt-10 p-8 bg-slate-50 rounded-3xl">
                      <p className="text-sm font-bold text-slate-900 uppercase tracking-widest mb-2">Designed For:</p>
-                     <p className="text-slate-500">Students in hostels, Working professionals in rentals, and Anyone who values hygiene but lacks time.</p>
+                     <p className="text-slate-500 leading-relaxed">Students in hostels and PG accommodations, working professionals in rental apartments, busy families, and anyone who values bedding hygiene but lacks time for regular laundry. Perfect for bachelors, couples, and shared living spaces in Delhi NCR.</p>
                   </div>
                 </div>
 
                 {/* Hygiene Benefit */}
                 <div className="md:col-span-2 bg-[#020617] p-10 rounded-[50px] text-white flex flex-col justify-center">
                    <ThunderboltOutlined className="text-4xl text-blue-500 mb-6" />
-                   <h3 className="text-2xl font-bold mb-2 text-white">Reduce Bacteria & Allergens</h3>
-                   <p className="text-slate-400">Save time and effort on laundry while improving sleep quality through clinical cleanliness.</p>
+                   <h3 className="text-2xl font-bold mb-4 text-white">Reduce Bacteria, Allergens & Dust Mites</h3>
+                   <p className="text-slate-300 leading-relaxed">Save time and effort on laundry while dramatically improving sleep quality and overall health through cleanliness. Our professional bedding washing service eliminates harmful microorganisms, reduces allergy symptoms, and prevents skin infections. Experience better sleep, clearer skin, and improved respiratory health with regularly sanitized bedding.</p>
                 </div>
 
                 {/* Sustainability */}
                 <div className="md:col-span-1 bg-blue-600 p-10 rounded-[50px] text-white flex flex-col justify-center">
-                   <h3 className="text-xl font-bold mb-2 text-white">Eco-Friendly</h3>
-                   <p className="text-blue-100 text-sm italic">Shared usage models reduce water waste by 40% compared to home washing.</p>
+                   <h3 className="text-xl font-bold mb-3 text-white">Eco-Friendly Laundry</h3>
+                   <p className="text-blue-100 text-sm leading-relaxed">Our shared bedding model and industrial washing efficiency reduce water consumption by atleast 40% and energy usage by 35% compared to home washing machines. Biodegradable detergents protect the environment while delivering superior cleaning results.</p>
                 </div>
 
                 {/* Service Area */}
                 <div className="md:col-span-1 bg-slate-200 p-10 rounded-[50px] flex flex-col justify-center">
                    <EnvironmentOutlined className="text-3xl text-slate-900 mb-4" />
-                   <h3 className="text-xl font-bold text-slate-900">Delhi NCR</h3>
-                   <p className="text-slate-500 text-xs">Gurgaon, Noida, Delhi & nearby areas. Expanding rapidly.</p>
+                   <h3 className="text-xl font-bold text-slate-900 mb-2">Delhi NCR Coverage</h3>
+                   <p className="text-slate-600 text-sm leading-relaxed">Currently serving Gurgaon and regions like Noida, Greater Noida, Delhi, Faridabad, and nearby "will be available soon". Expanding rapidly to cover entire NCR region and major Indian cities.</p>
                 </div>
               </div>
             </div>
