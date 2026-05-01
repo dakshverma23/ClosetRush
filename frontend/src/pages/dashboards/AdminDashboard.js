@@ -1287,7 +1287,10 @@ const AdminDashboard = () => {
                 </Card>
               </Col>
               <Col xs={24} sm={12} lg={6}>
-                <Card className="border-0 bg-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 rounded-xl">
+                <Card 
+                  className="border-0 bg-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 rounded-xl cursor-pointer"
+                  onClick={() => navigate('/admin/subscriptions')}
+                >
                   <div className="text-center">
                     <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                       <ShoppingOutlined className="text-white text-2xl" />

@@ -132,7 +132,7 @@ export default function GermGrowthChart() {
                       <Cell 
                         key={index} 
                         fill={barColor(index)} 
-                        fillOpacity={activeIndex === index ? 1 : 0.4}
+                        fillOpacity={1}
                         stroke={activeIndex === index ? "#fff" : "none"}
                         strokeWidth={2}
                         className="transition-all duration-300"

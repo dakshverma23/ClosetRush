@@ -99,7 +99,7 @@ export default function SalesBannerStrip() {
             <button
               onClick={() => navigate(BANNER_CONFIG.secondaryPath)}
               className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 hover:bg-white/10"
-              style={{ color: "rgba(168,196,240,0.85)", border: "1px solid rgba(168,196,240,0.25)" }}
+              style={{ color: "rgba(0, 29, 75, 0.85)", border: "1px solid rgba(168,196,240,0.25)" }}
             >
               {BANNER_CONFIG.secondaryLabel}
             </button>
@@ -110,7 +110,7 @@ export default function SalesBannerStrip() {
               className="flex items-center gap-1.5 px-4 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200"
               style={{
                 background: "linear-gradient(135deg,#fbbf24,#f59e0b)",
-                color: "#0f2a52",
+                color: "#00112aff",
                 boxShadow: "0 4px 16px rgba(251,191,36,0.35)",
               }}
               whileHover={{ scale: 1.05, boxShadow: "0 6px 24px rgba(251,191,36,0.5)" }}

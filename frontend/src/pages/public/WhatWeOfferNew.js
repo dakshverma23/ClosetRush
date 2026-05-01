@@ -3,12 +3,12 @@ import { Layout, message, Spin, Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ShoppingOutlined, 
   ArrowRightOutlined, 
   SafetyCertificateOutlined, 
   ThunderboltOutlined,
   EnvironmentOutlined,
-  CheckCircleOutlined
+  CheckCircleOutlined,
+  ExpandOutlined
 } from '@ant-design/icons';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
@@ -20,10 +20,11 @@ const { Content } = Layout;
 const WhatWeOfferNew = () => {
   const [bundles, setBundles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [hoveredIndex, setHoveredIndex] = useState(null);
-  const [isPaused, setIsPaused] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+
+  const visibleBundles = showAll ? bundles : bundles.slice(0, 6);
 
   useEffect(() => {
     fetchBundles();
@@ -49,21 +50,11 @@ const WhatWeOfferNew = () => {
     navigate('/subscriptions', { state: { bundleId } });
   };
 
-  const handleCardHover = (index) => {
-    setHoveredIndex(index);
-    setIsPaused(true);
-  };
-
-  const handleCardLeave = () => {
-    setHoveredIndex(null);
-    setIsPaused(false);
-  };
-
   if (loading) {
     return (
-      <div className="h-screen w-full flex flex-col items-center justify-center bg-[#FDFCFB]">
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0F172A]">
         <Spin size="large" />
-        <p className="mt-4 font-display text-gray-400 animate-pulse uppercase tracking-widest text-xs">Curating Comfort</p>
+        <p className="mt-4 font-display text-blue-400 animate-pulse uppercase tracking-[0.3em] text-[10px]">Curating Comfort</p>
       </div>
     );
   }
@@ -72,10 +63,9 @@ const WhatWeOfferNew = () => {
     <Layout className="min-h-screen bg-[#FDFCFB]">
       <Navbar />
       <Content>
-        {/* --- LUXURY HERO SECTION --- */}
+        {/* --- LUXURY HERO SECTION (Restored & Polished) --- */}
         <section className="relative h-[85vh] flex items-center overflow-hidden bg-[#0F172A]">
-          {/* Decorative background depth */}
-          <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#1e293b] to-transparent opacity-50" />
+          <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#1e3a8a] to-transparent opacity-50 z-1" />
           <motion.div 
             initial={{ opacity: 0, scale: 1.1 }}
             animate={{ opacity: 0.2, scale: 1 }}
@@ -90,40 +80,39 @@ const WhatWeOfferNew = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8 }}
               >
-                <Tag className="bg-transparent border-[#D4A574] text-[#D4A574] px-4 py-1 mb-6 rounded-full uppercase tracking-[0.2em] text-[10px] font-bold">
+                <Tag className="bg-transparent border-blue-500 text-blue-400 px-4 py-1 mb-6 rounded-full uppercase tracking-[0.2em] text-[10px] font-bold">
                   The New Standard of Sleep
                 </Tag>
               </motion.div>
               
               <motion.h1 
-                className="text-7xl lg:text-[10rem] font-display font-bold text-white leading-[0.85] mb-8"
+                className="text-6xl lg:text-[10rem] font-display font-bold text-white leading-[0.85] mb-8 tracking-tighter"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
               >
                 CLOSET <br />
-                <span className="text-[#D4A574]">RUSH.</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-400">RUSH.</span>
               </motion.h1>
 
               <motion.p 
-                className="text-xl text-gray-400 max-w-xl mb-10 font-light leading-relaxed"
+                className="text-lg text-gray-400 max-w-xl mb-10 font-light leading-relaxed"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 1, delay: 0.5 }}
               >
                 Five-star hotel linens, professionally laundered and delivered to your sanctuary. 
-                Because your rest isn't a luxury—it's a necessity.
+                Because hygiene isn't a luxury—it's a necessity.
               </motion.p>
 
               <motion.div 
-                className="flex gap-6"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7 }}
               >
                 <button 
                   onClick={() => navigate('/get-quote')}
-                  className="group px-10 py-5 bg-[#D4A574] text-[#0F172A] rounded-full font-bold flex items-center gap-3 hover:bg-white transition-all duration-500 shadow-xl"
+                  className="group px-10 py-5 bg-blue-600 text-white rounded-full font-bold flex items-center gap-3 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-500"
                 >
                   GET STARTED <ArrowRightOutlined className="group-hover:translate-x-2 transition-transform" />
                 </button>
@@ -132,185 +121,95 @@ const WhatWeOfferNew = () => {
           </div>
         </section>
 
-        {/* --- INFINITE BUNDLES CAROUSEL --- */}
-        <section className="py-32 bg-white overflow-hidden">
-          <div className="container mx-auto px-6 mb-20 text-center">
-            <h2 className="text-4xl lg:text-6xl font-display font-bold text-[#0F172A] mb-4">The Collections</h2>
-            <div className="w-24 h-1 bg-[#D4A574] mx-auto mb-6" />
-            <p className="text-gray-500 max-w-2xl mx-auto uppercase tracking-widest text-xs">Hover to explore the details of each bundle</p>
-          </div>
-
-          <div className="relative">
-            <motion.div 
-              className="flex gap-12"
-              animate={{
-                x: isPaused ? 0 : [0, -2880], // Large negative value for smooth loop
-              }}
-              transition={{
-                x: {
-                  repeat: Infinity,
-                  repeatType: "loop",
-                  duration: 40,
-                  ease: "linear",
-                },
-              }}
-              style={{ width: 'max-content' }}
-            >
-              {/* Logic: Tripling the array for a truly seamless loop at high resolutions */}
-              {[...bundles, ...bundles, ...bundles].map((bundle, index) => (
-                <motion.div
-                  key={`${bundle._id}-${index}`}
-                  className="relative flex-shrink-0 w-[450px] h-[600px] rounded-[3rem] overflow-hidden group cursor-none"
-                  onMouseEnter={() => handleCardHover(index)}
-                  onMouseLeave={handleCardLeave}
-                  whileHover={{ y: -15 }}
-                  transition={{ duration: 0.5, ease: "circOut" }}
-                >
-                  {/* Bundle Visual */}
-                  <div className="absolute inset-0 bg-[#F3F4F6]">
-                    {bundle.image ? (
-                      <img 
-                        src={bundle.image} 
-                        alt={bundle.name}
-                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-[#E8D5C4] to-[#D4A574] flex items-center justify-center">
-                        <span className="text-9xl font-bold text-white/20">{bundle.name.charAt(0)}</span>
-                      </div>
-                    )}
-                    {/* Soft gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-transparent opacity-80" />
-                  </div>
-
-                  {/* Card Front Content */}
-                  <div className="absolute bottom-0 left-0 right-0 p-12 text-white">
-                    <p className="text-[#D4A574] font-bold tracking-widest text-[10px] uppercase mb-2">Signature Bundle</p>
-                    <h3 className="text-4xl font-display font-bold mb-4">{bundle.name}</h3>
-                    <div className="flex items-center gap-4">
-                       <span className="text-2xl font-light italic">Starting at ₹{bundle.price}</span>
-                       <div className="h-[1px] w-12 bg-white/30" />
-                    </div>
-                  </div>
-
-                  {/* HOVER OVERLAY: MODERN REWRITE */}
-                  <AnimatePresence>
-                    {hoveredIndex === index && (
-                      <motion.div
-                        className="absolute inset-0 bg-[#0F172A]/95 backdrop-blur-xl flex flex-col justify-center p-12"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.4 }}
-                      >
-                        <motion.div
-                          initial={{ y: 20, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 0.1 }}
-                        >
-                          <h3 className="text-4xl font-display font-bold text-white mb-6 underline decoration-[#D4A574] underline-offset-8">
-                            {bundle.name}
-                          </h3>
-                          
-                          <p className="text-gray-400 text-lg mb-8 font-light leading-relaxed">
-                            {bundle.description || 'Our master-tier subscription featuring premium high-thread count cotton and weekly concierge care.'}
-                          </p>
-
-                          <div className="space-y-4 mb-10">
-                            {bundle.items?.slice(0, 3).map((item, idx) => (
-                              <div key={idx} className="flex items-center text-white/90 group">
-                                <div className="w-2 h-2 rounded-full bg-[#D4A574] mr-4 group-hover:scale-150 transition-transform" />
-                                <span className="text-sm tracking-wide">{item.quantity}x {item.category?.name || 'Luxury Item'}</span>
-                              </div>
-                            ))}
-                          </div>
-
-                          <div className="mb-10">
-                            <span className="text-5xl font-bold text-white">₹{bundle.price}</span>
-                            <span className="text-gray-500 ml-3 uppercase text-xs tracking-widest">
-                               / {bundle.billingCycle}
-                            </span>
-                          </div>
-
-                          <button
-                            onClick={() => handleSubscribe(bundle._id)}
-                            className="w-full py-5 bg-[#D4A574] text-[#0F172A] font-bold rounded-2xl hover:bg-white transition-all duration-300 active:scale-95"
-                          >
-                            SELECT BUNDLE
-                          </button>
-                        </motion.div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-        </section>
-
-        {/* --- CLASSY FEATURES SECTION --- */}
-        <section className="py-32 bg-[#F8FAFC]">
-          <div className="container mx-auto px-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-              {[
-                { 
-                  icon: <ThunderboltOutlined />, 
-                  title: "Elite Delivery", 
-                  desc: "Scheduled concierge delivery that respects your time." 
-                },
-                { 
-                  icon: <SafetyCertificateOutlined />, 
-                  title: "Hygienic Pro", 
-                  desc: "Medical-grade sanitation processes for every fiber." 
-                },
-                { 
-                  icon: <EnvironmentOutlined />, 
-                  title: "Eco-Conscious", 
-                  desc: "Sustainability in every wash and every route." 
-                },
-                { 
-                  icon: <CheckCircleOutlined />, 
-                  title: "Quality Hub", 
-                  desc: "100% Cotton, 400+ Thread count as standard." 
-                }
-              ].map((feature, i) => (
-                <motion.div 
-                  key={i}
-                  className="group p-8 bg-white rounded-[2rem] shadow-sm hover:shadow-2xl transition-all duration-500"
-                  whileHover={{ y: -10 }}
-                >
-                  <div className="text-3xl text-[#D4A574] mb-6 group-hover:scale-110 transition-transform">{feature.icon}</div>
-                  <h4 className="text-xl font-bold text-[#0F172A] mb-3">{feature.title}</h4>
-                  <p className="text-gray-500 font-light text-sm leading-relaxed">{feature.desc}</p>
-                </motion.div>
-              ))}
+        {/* --- COMPACT BUNDLES GRID --- */}
+        <section className="py-20 md:py-32 bg-[#FDFCFB]">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="mb-16 text-center md:text-left">
+              <h2 className="text-4xl font-display font-bold text-[#0F172A] mb-2">The Collections</h2>
+              <div className="w-16 h-1 bg-blue-600 mx-auto md:mx-0" />
             </div>
+
+            {/* Grid Logic: 2 columns on mobile, 3 on desktop to reduce scroll */}
+            <motion.div 
+              layout
+              className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-10"
+            >
+              <AnimatePresence mode='popLayout'>
+                {visibleBundles.map((bundle, index) => (
+                  <motion.div
+                    key={bundle._id}
+                    layout
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ type: "spring", stiffness: 100, delay: index * 0.05 }}
+                    className="group relative h-[320px] md:h-[600px] rounded-[1.5rem] md:rounded-[3rem] overflow-hidden bg-slate-200 shadow-xl shadow-black/5"
+                  >
+                    {/* Visual */}
+                    <div className="absolute inset-0">
+                      {bundle.image ? (
+                        <img src={bundle.image} alt={bundle.name} className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110" />
+                      ) : (
+                        <div className="w-full h-full bg-slate-800 flex items-center justify-center text-white/10 text-6xl font-bold">{bundle.name[0]}</div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                    </div>
+
+                    {/* Info */}
+                    <div className="absolute inset-0 p-5 md:p-12 flex flex-col justify-end text-white">
+                      <Tag className="w-fit bg-blue-600/80 backdrop-blur-md border-none text-white text-[8px] md:text-[10px] px-2 mb-2 rounded-full uppercase font-bold">
+                        {bundle.billingCycle}
+                      </Tag>
+                      <h3 className="text-xl md:text-4xl font-display font-bold mb-1 md:mb-4">{bundle.name}</h3>
+                      
+                      <div className="flex items-center justify-between pt-4 border-t border-white/20 mt-2">
+                        <div>
+                          <span className="text-lg md:text-3xl font-bold">₹{bundle.price}</span>
+                          <p className="text-[8px] md:text-[10px] text-white/50 uppercase tracking-widest">Base Rate</p>
+                        </div>
+                        <motion.button 
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handleSubscribe(bundle._id)}
+                          className="w-10 h-10 md:w-16 md:h-16 bg-white text-black rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all shadow-lg"
+                        >
+                          <ArrowRightOutlined className="text-sm md:text-xl" />
+                        </motion.button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* Pagination Button */}
+            {!showAll && bundles.length > 6 && (
+              <div className="mt-20 text-center">
+                <button 
+                  onClick={() => setShowAll(true)}
+                  className="px-10 py-4 bg-[#0F172A] text-white rounded-full font-bold flex items-center gap-3 mx-auto hover:bg-blue-600 transition-all shadow-xl"
+                >
+                  <ExpandOutlined /> SHOW ALL EDITIONS
+                </button>
+              </div>
+            )}
           </div>
         </section>
 
         {/* --- LUXURY CTA --- */}
-        <section className="py-40 bg-[#0F172A] relative overflow-hidden">
-          {/* Abstract circles */}
-          <div className="absolute top-0 right-0 w-96 h-96 bg-[#D4A574] rounded-full opacity-5 blur-[120px]" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#D4A574] rounded-full opacity-5 blur-[120px]" />
-
+        <section className="py-32 bg-[#0F172A] relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px]" />
           <div className="container mx-auto px-6 text-center relative z-10">
-            <h2 className="text-5xl lg:text-7xl font-display font-bold text-white mb-8">
-              Elevate Your <span className="italic font-light">Everyday.</span>
-            </h2>
-            <p className="text-gray-400 text-xl max-w-2xl mx-auto mb-12 font-light">
-              Join the elite circle of individuals who prioritize their recovery as much as their ambition.
-            </p>
+            <h2 className="text-4xl md:text-6xl font-display font-bold text-white mb-10">Elevate Your Everyday.</h2>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <button 
                 onClick={() => navigate('/register')}
-                className="px-12 py-5 bg-white text-[#0F172A] rounded-full font-bold hover:bg-[#D4A574] transition-all duration-500"
+                className="px-12 py-5 bg-blue-600 text-white rounded-full font-bold hover:shadow-2xl hover:shadow-blue-500/50 transition-all"
               >
                 JOIN THE CLUB
               </button>
               <button 
                 onClick={() => navigate('/get-quote')}
-                className="px-12 py-5 border border-white/20 text-white rounded-full font-bold hover:bg-white/10 transition-all duration-500"
+                className="px-12 py-5 bg-white text-blue-600 rounded-full font-bold border border-white hover:bg-transparent hover:text-white transition-all duration-300"
               >
                 REQUEST CUSTOM QUOTE
               </button>

@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
   InstagramOutlined,
-  YoutubeOutlined,
+  LinkedinOutlined,
   PhoneOutlined,
   MailOutlined
 } from '@ant-design/icons';
@@ -61,7 +61,7 @@ const Footer = () => {
           {/* Social Links */}
           <div className="flex justify-center gap-3 mb-4">
             <a 
-              href="https://instagram.com" 
+              href="https://www.instagram.com/closetrush_official?igsh=bTN1ZHhhN2Fvdzdv" 
               target="_blank" 
               rel="noopener noreferrer"
               className="w-9 h-9 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300"
@@ -69,12 +69,12 @@ const Footer = () => {
               <InstagramOutlined className="text-base" />
             </a>
             <a 
-              href="https://youtube.com" 
+              href="https://www.linkedin.com/company/closet-rush/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="w-9 h-9 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300"
             >
-              <YoutubeOutlined className="text-base" />
+              <LinkedinOutlined className="text-base" />
             </a>
           </div>
 
@@ -102,7 +102,7 @@ const Footer = () => {
               </p>
               <div className="flex gap-3">
                 <a 
-                  href="https://instagram.com" 
+                  href="https://www.instagram.com/closetrush_official?igsh=bTN1ZHhhN2Fvdzdv" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
@@ -110,12 +110,12 @@ const Footer = () => {
                   <InstagramOutlined className="text-lg" />
                 </a>
                 <a 
-                  href="https://youtube.com" 
+                  href="https://www.linkedin.com/company/closet-rush/" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
                 >
-                  <YoutubeOutlined className="text-lg" />
+                  <LinkedinOutlined className="text-lg" />
                 </a>
               </div>
             </div>

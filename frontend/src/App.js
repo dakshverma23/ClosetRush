@@ -53,6 +53,7 @@ import InventoryManagementPage from './pages/admin/InventoryManagementPage';
 import BundlesManagementPage from './pages/admin/BundlesManagementPage';
 import PickupMemberApprovals from './pages/admin/PickupMemberApprovals';
 import StaffApprovalsPage from './pages/admin/StaffApprovalsPage';
+import ActiveSubscriptionsPage from './pages/admin/ActiveSubscriptionsPage';
 
 // Import pickup member pages
 import SubmitPickupReport from './pages/pickup/SubmitPickupReport';
@@ -272,6 +273,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={['admin']}>
             <BundlesManagementPage />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/subscriptions" 
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <ActiveSubscriptionsPage />
           </ProtectedRoute>
         } 
       />
