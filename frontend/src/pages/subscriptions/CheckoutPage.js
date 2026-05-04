@@ -135,35 +135,95 @@ const CheckoutPage = () => {
       return;
     }
 
+    // Only Razorpay is implemented for now
+    if (paymentMethod !== 'razorpay') {
+      message.info('This payment method will be available soon. Please use Razorpay.');
+      return;
+    }
+
     setProcessing(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Process payment for all requests
+      // Calculate total amount
+      const totalAmount = getTotalAmount();
+      
+      // Get all request IDs
       const ids = requestIds.length > 0 ? requestIds : [requestId];
-      await Promise.all(
-        ids.map(id =>
-          api.post(`/subscription-requests/${id}/payment`, {
-            paymentMethod,
-            paymentId: `TEMP_${Date.now()}`,
-            status: 'pending'
-          })
-        )
-      );
+      
+      // Create Razorpay order
+      const orderResponse = await api.post('/payments/create-order', {
+        amount: totalAmount,
+        currency: 'INR',
+        receipt: `receipt_${Date.now()}`,
+        subscriptionRequestId: ids[0] // Primary request ID
+      });
 
-      // Clear cart from sessionStorage after successful payment
-      sessionStorage.removeItem('checkoutCart');
-      sessionStorage.removeItem('checkoutRequestIds');
+      const { order, key } = orderResponse.data;
 
-      setCurrentStep(2);
-      message.success('Payment initiated successfully!');
+      // Initialize Razorpay checkout
+      const options = {
+        key: key || process.env.REACT_APP_RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'ClosetRush',
+        description: 'Subscription Payment',
+        order_id: order.id,
+        handler: async function (response) {
+          // Payment successful - verify signature
+          try {
+            await api.post('/payments/verify', {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              subscriptionRequestId: ids[0]
+            });
 
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 3000);
+            // Update all subscription requests with payment info
+            await Promise.all(
+              ids.map(id =>
+                api.post(`/subscription-requests/${id}/payment`, {
+                  paymentMethod: 'razorpay',
+                  paymentId: response.razorpay_payment_id,
+                  status: 'completed'
+                })
+              )
+            );
+
+            // Clear cart from sessionStorage
+            sessionStorage.removeItem('checkoutCart');
+            sessionStorage.removeItem('checkoutRequestIds');
+
+            setCurrentStep(2);
+            message.success('Payment successful!');
+
+            setTimeout(() => {
+              navigate('/dashboard');
+            }, 3000);
+          } catch (error) {
+            message.error('Payment verification failed. Please contact support.');
+            console.error('Verification error:', error);
+          }
+        },
+        prefill: {
+          name: request.userId?.name || '',
+          email: request.userId?.email || '',
+          contact: formValues?.mobileNo || request.userId?.mobile || ''
+        },
+        theme: {
+          color: '#2563EB'
+        },
+        modal: {
+          ondismiss: function() {
+            message.info('Payment cancelled');
+            setProcessing(false);
+          }
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+      setProcessing(false);
     } catch (error) {
-      message.error(error.response?.data?.message || 'Payment failed');
-    } finally {
+      message.error(error.response?.data?.message || 'Failed to initiate payment');
       setProcessing(false);
     }
   };
@@ -601,9 +661,9 @@ const CheckoutPage = () => {
               {currentStep === 1 && (
                 <Card title="Select Payment Method">
                   <Alert
-                    message="Payment Gateway Integration Pending"
-                    description="Payment gateways will be integrated soon. For now, you can proceed with a test payment."
-                    type="info"
+                    message="Secure Payment"
+                    description="Your payment is 100% secure. We use industry-standard encryption to protect your data."
+                    type="success"
                     showIcon
                     className="mb-4"
                   />
@@ -615,11 +675,11 @@ const CheckoutPage = () => {
                   >
                     <div className="space-y-3">
                       {[
-                        { value: 'razorpay', label: 'Razorpay', sub: 'Credit/Debit Card, UPI, Net Banking', icon: <CreditCardOutlined className="text-2xl text-blue-600" /> },
-                        { value: 'paytm', label: 'Paytm', sub: 'Paytm Wallet, UPI', icon: <MobileOutlined className="text-2xl text-blue-600" /> },
-                        { value: 'phonepe', label: 'PhonePe', sub: 'PhonePe Wallet, UPI', icon: <MobileOutlined className="text-2xl text-purple-600" /> },
-                        { value: 'upi', label: 'UPI', sub: 'Google Pay, PhonePe, Paytm', icon: <BankOutlined className="text-2xl text-green-600" /> },
-                        { value: 'bank_transfer', label: 'Bank Transfer', sub: 'NEFT, RTGS, IMPS', icon: <BankOutlined className="text-2xl text-gray-600" /> }
+                        { value: 'razorpay', label: 'Razorpay', sub: 'Credit/Debit Card, UPI, Net Banking', icon: <CreditCardOutlined className="text-2xl text-blue-600" />, available: true },
+                        { value: 'paytm', label: 'Paytm', sub: 'Paytm Wallet, UPI', icon: <MobileOutlined className="text-2xl text-blue-600" />, available: false },
+                        { value: 'phonepe', label: 'PhonePe', sub: 'PhonePe Wallet, UPI', icon: <MobileOutlined className="text-2xl text-purple-600" />, available: false },
+                        { value: 'upi', label: 'UPI', sub: 'Google Pay, PhonePe, Paytm', icon: <BankOutlined className="text-2xl text-green-600" />, available: false },
+                        { value: 'bank_transfer', label: 'Bank Transfer', sub: 'NEFT, RTGS, IMPS', icon: <BankOutlined className="text-2xl text-gray-600" />, available: false }
                       ].map(opt => (
                         <Card
                           key={opt.value}
@@ -627,17 +687,18 @@ const CheckoutPage = () => {
                             paymentMethod === opt.value
                               ? 'border-2 border-blue-500'
                               : 'border border-gray-200 hover:border-blue-300'
-                          }`}
-                          onClick={() => setPaymentMethod(opt.value)}
+                          } ${!opt.available ? 'opacity-60' : ''}`}
+                          onClick={() => opt.available && setPaymentMethod(opt.value)}
                         >
-                          <Radio value={opt.value}>
+                          <Radio value={opt.value} disabled={!opt.available}>
                             <div className="flex items-center gap-3">
                               {opt.icon}
                               <div>
                                 <div className="font-semibold">{opt.label}</div>
                                 <div className="text-xs text-gray-500">{opt.sub}</div>
                               </div>
-                              <Tag color="orange" className="ml-auto">Coming Soon</Tag>
+                              {!opt.available && <Tag color="orange" className="ml-auto">Coming Soon</Tag>}
+                              {opt.available && <Tag color="green" className="ml-auto">Available</Tag>}
                             </div>
                           </Radio>
                         </Card>
@@ -669,15 +730,14 @@ const CheckoutPage = () => {
                 <Card>
                   <div className="text-center py-8">
                     <CheckCircleOutlined className="text-6xl text-green-500 mb-4" />
-                    <h2 className="text-2xl font-bold mb-2">Payment Initiated!</h2>
+                    <h2 className="text-2xl font-bold mb-2">Payment Successful!</h2>
                     <p className="text-gray-600 mb-4">
-                      Your subscription request has been received. Once payment gateway is integrated,
-                      your subscription will be activated automatically.
+                      Your subscription has been activated successfully. You will receive a confirmation email shortly.
                     </p>
                     <Alert
-                      message="Test Mode"
-                      description="This is a test payment. In production, your subscription will be activated immediately after successful payment."
-                      type="info"
+                      message="What's Next?"
+                      description="Our team will contact you to schedule the delivery. You can track your subscription status in your dashboard."
+                      type="success"
                       showIcon
                       className="mb-4"
                     />

@@ -53,6 +53,7 @@ app.use('/api/categories', require('./routes/categories'));
 app.use('/api/bundles', require('./routes/bundles'));
 app.use('/api/subscriptions', require('./routes/subscriptions'));
 app.use('/api/subscription-requests', require('./routes/subscriptionRequests'));
+app.use('/api/payments', require('./routes/payments'));
 app.use('/api/calculate', require('./routes/calculate'));
 app.use('/api/properties', require('./routes/properties'));
 app.use('/api/inventory', require('./routes/inventory'));

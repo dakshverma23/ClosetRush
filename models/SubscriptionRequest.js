@@ -86,6 +86,19 @@ const subscriptionRequestSchema = new mongoose.Schema({
   paymentDate: {
     type: Date
   },
+  // Razorpay specific fields
+  razorpayOrderId: {
+    type: String,
+    trim: true
+  },
+  razorpayPaymentId: {
+    type: String,
+    trim: true
+  },
+  razorpaySignature: {
+    type: String,
+    trim: true
+  },
   // Request status
   status: {
     type: String,

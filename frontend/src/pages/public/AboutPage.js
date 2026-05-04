@@ -148,32 +148,225 @@ const AboutPage = () => {
             </div>
           </section>
 
-          {/* ── SECTION 3: THE EMOTIONAL CORE (HARSHIT'S STORY) ── */}
-          <section className="py-40 bg-slate-50 overflow-hidden">
-             <div className="max-w-5xl mx-auto px-6 relative">
+          {/* ── SECTION 3: HOW IT STARTED (FOUNDER'S STORY) ── */}
+          <section className="py-16 md:py-24 bg-slate-50">
+             <div className="max-w-4xl mx-auto px-4 md:px-6">
                 <SmoothReveal>
-                  <div className="text-center mb-20">
-                    <span className="text-blue-600 font-black uppercase tracking-[0.5em] text-[10px]">Real Story / Why this matters</span>
-                    <h2 className="text-5xl md:text-7xl font-bold text-slate-900 tracking-tighter mt-4">Harshit's Story.</h2>
+                  <div className="text-center mb-10 md:mb-12">
+                    <span className="text-blue-600 font-semibold uppercase tracking-wider text-xs">November 2024 / The Beginning</span>
+                    <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mt-3">How It Started</h2>
                   </div>
                   
-                  <div className="relative bg-white p-12 md:p-24 rounded-[80px] shadow-sm border border-slate-200">
-                    <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl shadow-blue-600/40">
-                       <HeartOutlined className="text-3xl" />
-                    </div>
-                    <p className="text-2xl md:text-4xl text-slate-800 font-light leading-snug italic text-center">
-                     <span className="font-bold text-blue-600 text-not-italic">Harshit</span>, started facing ear infections and scalp irritation. Later, doctors pointed out that prolonged exposure to bacteria and moisture on unwashed bedding was the trigger."
-                    </p>
-                    <div className="mt-12 flex flex-wrap justify-center gap-4">
-                       <Tag color="red" className="rounded-full px-6 py-2 font-bold uppercase text-[10px]">Sweat during sleep</Tag>
-                       <Tag color="red" className="rounded-full px-6 py-2 font-bold uppercase text-[10px]">Weeks of same bedding</Tag>
+                  <div className="bg-white p-6 md:p-10 rounded-2xl shadow-sm border border-slate-200">
+                    <div className="space-y-5">
+                      <p className="text-lg md:text-xl text-slate-700 leading-relaxed text-center">
+                        "November 2024… Everything changed with something very small… yet very serious."
+                      </p>
+                      
+                      <p className="text-base md:text-lg text-slate-600 leading-relaxed">
+                        Suddenly, I started experiencing <span className="font-semibold text-red-600">severe acne and breakouts</span>. No skincare routine was working. The situation kept getting worse, and the marks started becoming permanent.
+                      </p>
+                      
+                      <p className="text-base md:text-lg text-slate-600 leading-relaxed">
+                        When I finally consulted a doctor, the answer was unexpected.
+                      </p>
+                      
+                      <div className="bg-blue-50 p-5 md:p-6 rounded-xl border border-blue-200 my-6">
+                        <p className="text-lg md:text-2xl font-bold text-blue-900 text-center mb-2">The problem wasn't my skin.</p>
+                        <p className="text-lg md:text-2xl font-bold text-blue-900 text-center">It was my bedsheet and pillow cover.</p>
+                      </div>
+                      
+                      <div className="bg-slate-900 p-5 md:p-6 rounded-xl text-white">
+                        <p className="text-base md:text-lg font-semibold mb-3 text-center">The Realization:</p>
+                        <p className="text-lg md:text-2xl font-light text-center leading-relaxed mb-3">
+                          Clean-looking is <span className="font-bold text-red-400">not equal to</span> hygienically clean.
+                        </p>
+                        <p className="text-sm md:text-base text-slate-300 text-center leading-relaxed">
+                          Your bedsheet may look perfectly fine… but it can still carry bacteria, sweat, dead skin, and moisture. And we spend 6–8 hours every single day on it.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </SmoothReveal>
              </div>
           </section>
 
-          {/* ── SECTION 4: FOUNDER'S JOURNEY ── */}
+          {/* ── SECTION 3B: REAL STORIES ── */}
+          <section className="py-12 md:py-16 bg-white">
+            <div className="max-w-6xl mx-auto px-4 md:px-6">
+              <SmoothReveal>
+                <div className="text-center mb-8 md:mb-10">
+                  <h2 className="text-2xl md:text-4xl font-bold text-slate-900 mb-2">What Research & Real Stories Showed</h2>
+                  <p className="text-sm md:text-base text-slate-600 max-w-2xl mx-auto">As I started researching, I found similar cases around me:</p>
+                </div>
+              </SmoothReveal>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
+                {[
+                  {
+                    name: "Harshit",
+                    issue: "Ear Infection",
+                    desc: "Developed an ear infection due to bacteria buildup caused by moisture in improperly dried bedsheets during monsoon.",
+                    icon: "🦠"
+                  },
+                  {
+                    name: "A Friend",
+                    issue: "Scalp Irritation",
+                    desc: "Struggled with scalp irritation and dandruff, despite using premium hair products — the real issue was an unhygienic pillow cover.",
+                    icon: "💆"
+                  },
+                  {
+                    name: "Many People",
+                    issue: "Skin Problems",
+                    desc: "Face skin rashes, allergies, and body acne simply due to poor bedding hygiene.",
+                    icon: "😰"
+                  }
+                ].map((story, i) => (
+                  <SmoothReveal key={i} delay={i * 0.1}>
+                    <div className="bg-slate-50 p-5 md:p-6 rounded-xl border border-slate-200 hover:border-blue-500 hover:shadow-sm transition-all h-full">
+                      <div className="text-3xl md:text-4xl mb-3">{story.icon}</div>
+                      <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-1">{story.name}</h3>
+                      <p className="text-xs md:text-sm font-semibold text-red-600 mb-3">{story.issue}</p>
+                      <p className="text-xs md:text-sm text-slate-600 leading-relaxed">{story.desc}</p>
+                    </div>
+                  </SmoothReveal>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ── SECTION 3C: THE PROBLEM ── */}
+          <section className="py-12 md:py-16 bg-slate-900 text-white">
+            <div className="max-w-4xl mx-auto px-4 md:px-6">
+              <SmoothReveal>
+                <div className="text-center mb-8 md:mb-10">
+                  <h2 className="text-2xl md:text-4xl font-bold mb-3">The Problem</h2>
+                  <p className="text-base md:text-lg text-slate-300">
+                    We all know bedsheets should be clean… But realistically:
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    { icon: "⏰", text: "Washing every 2–3 days is difficult" },
+                    { icon: "☔", text: "Drying properly (especially in monsoon) is a challenge" },
+                    { icon: "😓", text: "Maintaining hygiene consistently is almost impossible" }
+                  ].map((item, i) => (
+                    <div key={i} className="bg-white/10 p-5 rounded-xl border border-white/20 text-center">
+                      <div className="text-3xl mb-2">{item.icon}</div>
+                      <p className="text-sm md:text-base font-medium">{item.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </SmoothReveal>
+            </div>
+          </section>
+
+          {/* ── SECTION 4: THE SOLUTION (CLOSETRUSH) ── */}
+          <section className="py-16 md:py-24 bg-white">
+            <div className="max-w-5xl mx-auto px-4 md:px-6">
+              <SmoothReveal>
+                <div className="text-center mb-12 md:mb-16">
+                  <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-4">The Solution</h2>
+                  <p className="text-lg md:text-xl text-slate-600">That's why we started:</p>
+                </div>
+                
+                <div className="text-center mb-10 md:mb-12">
+                  <h3 className="text-2xl md:text-4xl font-bold text-blue-600 mb-3">ClosetRush Bedsheet Rental</h3>
+                  <p className="text-base md:text-lg text-slate-600 max-w-2xl mx-auto">
+                    A simple, affordable solution where you get:
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                  {[
+                    { icon: "✨", title: "Regularly Cleaned Bedsheets", desc: "Fresh, sanitized bedding delivered to your door" },
+                    { icon: "🧼", title: "Hygienically Processed Fabric", desc: "Medical-grade cleaning with UV-C sterilization" },
+                    { icon: "😌", title: "Hassle-Free Experience", desc: "No washing, no drying, no folding required" }
+                  ].map((feature, i) => (
+                    <div key={i} className="bg-slate-50 p-6 rounded-2xl text-center hover:shadow-md transition-shadow">
+                      <div className="text-4xl mb-3">{feature.icon}</div>
+                      <h4 className="text-base md:text-lg font-semibold text-slate-900 mb-2">{feature.title}</h4>
+                      <p className="text-sm text-slate-600">{feature.desc}</p>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="text-center mb-12">
+                  <div className="inline-block bg-blue-50 border-2 border-blue-600 px-8 py-4 rounded-2xl">
+                    <p className="text-sm font-semibold text-slate-600 mb-1">All at just</p>
+                    <p className="text-4xl md:text-5xl font-black text-blue-600">₹10<span className="text-xl align-super">**</span>/day</p>
+                  </div>
+                </div>
+                
+                <div className="border-t border-slate-200 pt-10">
+                  <h3 className="text-2xl md:text-3xl font-bold text-slate-900 text-center mb-3">Our Vision</h3>
+                  <p className="text-base md:text-lg text-center text-slate-600 mb-8 max-w-2xl mx-auto">
+                    We're not just renting bedsheets. We're building a hygiene habit.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[
+                      { icon: "😴", text: "Better Sleep" },
+                      { icon: "✨", text: "Better Skin" },
+                      { icon: "💪", text: "Better Health" }
+                    ].map((item, i) => (
+                      <div key={i} className="bg-slate-50 p-4 rounded-xl text-center">
+                        <div className="text-3xl mb-2">{item.icon}</div>
+                        <p className="text-base font-semibold text-slate-900">{item.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </SmoothReveal>
+            </div>
+          </section>
+
+          {/* ── SECTION 4B: CLOSING IMPACT LINE ── */}
+          <section className="py-12 md:py-16 bg-slate-50">
+            <div className="max-w-4xl mx-auto px-4 md:px-6">
+              <SmoothReveal>
+                <div className="text-center">
+                  <p className="text-xl md:text-3xl font-bold text-slate-900 leading-snug mb-3">
+                    "Your bedsheet touches your life more than you think.
+                  </p>
+                  <p className="text-xl md:text-3xl font-bold text-red-600 leading-snug">
+                    Make sure it's not silently harming you."
+                  </p>
+                </div>
+              </SmoothReveal>
+            </div>
+          </section>
+
+          {/* ── SECTION 4C: TRUSTED BRANDS ── */}
+          <section className="py-12 md:py-16 bg-white">
+            <div className="max-w-6xl mx-auto px-4 md:px-6">
+              <SmoothReveal>
+                <div className="text-center mb-8 md:mb-12">
+                  <h2 className="text-2xl md:text-4xl font-bold text-slate-900 mb-2">Trusted Brands We Work With</h2>
+                  <p className="text-sm md:text-base text-slate-600">Premium quality bedding from India's leading textile brands</p>
+                </div>
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                  {[
+                    "Spaces (by Welspun)",
+                    "D'Decor",
+                    "Bombay Dyeing",
+                    "MyTrident (Trident)",
+                    "Portico New York",
+                    "Jaipur Fabric",
+                    "Raymond Home",
+                    "More Coming Soon..."
+                  ].map((brand, i) => (
+                    <div key={i} className="bg-slate-50 p-4 md:p-6 rounded-xl border border-slate-200 flex items-center justify-center text-center hover:border-blue-500 hover:shadow-sm transition-all">
+                      <p className="text-xs md:text-sm font-semibold text-slate-700">{brand}</p>
+                    </div>
+                  ))}
+                </div>
+              </SmoothReveal>
+            </div>
+          </section>
+
+          {/* ── SECTION 4D: FOUNDER'S JOURNEY ── */}
           <section className="py-32 bg-white">
             <div className="max-w-7xl mx-auto px-6">
               <Row gutter={[100, 100]} align="middle" className="flex-row-reverse">
@@ -267,7 +460,7 @@ const AboutPage = () => {
                 {[
                   { icon: ExperimentOutlined, t: "UV-C Sanitization", j: "Journal of Textile Science, 2023", c: "UV-C light at 254nm wavelength eliminates 99.9% of bacteria, viruses, and mold spores.", l: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7194064/", bg: "#eff6ff", tx: "#2563eb" },
                   { icon: SafetyOutlined, t: "Eco-Detergent Performance", j: "Env Science & Tech, 2023", c: "Biodegradable detergents match petroleum alternatives in efficacy while reducing impact by 85%.", l: "https://pubs.acs.org/journal/esthag", bg: "#f0fdf4", tx: "#16a34a" },
-                  { icon: HeartOutlined, t: "Allergen Reduction", j: "Respiratory Medicine, 2022", c: "Regular sanitization reduces household allergen exposure by 73%, improving respiratory health.", l: "https://www.atsjournals.org/", bg: "#faf5ff", tx: "#9333ea" },
+                  { icon: HeartOutlined, t: "Allergen Reduction", j: "Respiratory Medicine, 2022", c: "Regular sanitization reduces household allergen exposure by 73%, significantly improving respiratory health and reducing allergy symptoms.", l: "https://www.atsjournals.org/", bg: "#faf5ff", tx: "#9333ea" },
                   { icon: TrophyOutlined, t: "Fabric Longevity", j: "International Textile Institute, 2023", c: "Specific care protocols extend garment lifespan by 3-5 years, reducing waste and saving costs.", l: "https://www.tandfonline.com/journals/ttpr20", bg: "#fff7ed", tx: "#ea580c" }
                 ].map((res, i) => (
                   <Col xs={24} md={12} lg={6} key={i}>
